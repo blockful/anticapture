@@ -125,8 +125,8 @@ once that end `< now`. Rows run to the current month.
 later. On the registry-of-record basis no name leaves the count in 2026-10 or 2026-11, so those months show a net
 gain equal to their registrations (+5,951 and +2,494) after a year of losing 23k to 37k names a month. That is a
 pause in expirations, not growth. On the paid-term basis the same months are -31,001 and -29,358, and every month
-before 2026-10 is identical on both bases. The on-chain count is kept as `cumulative_onchain`, and the dashboard shows
-it next to the headline.
+before 2026-10 is identical on both bases. The on-chain count is kept as `cumulative_onchain` for API consumers. The
+dashboard does not show it: two counts next to each other read as a contradiction.
 
 Run of 2026-11-19: `cumulative_active` 784,310 and `cumulative_onchain` 853,114 for 2026-11. The 68,804 names of
 difference are in their free 62 days without having renewed.

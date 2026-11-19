@@ -5,12 +5,14 @@ import { useGetRevenueEnsv2Daily } from "@anticapture/client/hooks";
 
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ComboChart } from "@/shared/components/design-system/charts/combo-chart/ComboChart";
+import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
 import { cn } from "@/shared/utils/cn";
 
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { formatCompact, formatUsd } from "@/features/revenue/utils/format";
+import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
 import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import {
   ENSV2_REVENUE_BASIS,
@@ -21,17 +23,28 @@ import {
   transformToEnsv2Revenue,
 } from "@/features/revenue/utils/transform";
 
-const KPI_COUNT = 4;
 const CHART_HEIGHT = 260;
 
-/** Right axis of the migration chart: a share of v1 names, e.g. "3.5%". */
+/** KPI titles, in the order of the cards; shown as given while the data is unavailable. */
+const UNAVAILABLE_TITLES = [
+  "Revenue since ENSv2",
+  "Names migrated",
+  "New ENSv2 registrations",
+];
+const KPI_COUNT = UNAVAILABLE_TITLES.length;
+
+/** The stacked chart shortens long axes to the year by default; days keep their label. */
+const keepDayLabel = (label: string): string => label;
+
+/** Right axis of the migration chart: a share of names, e.g. "3.5%". */
 const formatShareAxis = (value: number): string =>
   `${Number(value.toFixed(2))}%`;
 
 /**
- * ENSv2 since its launch: revenue, how many v1 names have migrated, and both
- * as daily series so a campaign or a protocol change can be read against the
- * days around it.
+ * ENSv2 since its launch, built from the same pieces as the rest of the
+ * page: a KPI card like "Usage & Adoption", then two chart cards side by side
+ * like the bottom row. The charts are daily, so a campaign or a protocol
+ * change can be read against the days around it.
  */
 export const Ensv2Section = () => {
   const query = useGetRevenueEnsv2Daily("ens");
@@ -51,111 +64,154 @@ export const Ensv2Section = () => {
     };
   }, [isLoading, isUnavailable, items, cutoff, cutoffKnown]);
 
-  return (
-    <Card>
-      <div className="border-border-default flex flex-wrap items-center justify-between gap-2 border-b p-4">
-        <div className="flex items-center gap-1.5">
-          <p className="text-secondary text-sm font-medium">ENSv2</p>
-          <InfoTooltip>
-            {paragraphs(
-              "ENSv2 went live on Oct 27, 2026. Since then every registration and renewal is paid on ENSv2 contracts, in USDC or DAI, and v1 names can migrate to the ENSv2 registry.",
-              "This section covers that period only, by UTC day. The launch day and the latest day are partial.",
-            )}
-          </InfoTooltip>
-        </div>
-        {view && (
-          <p className="text-secondary text-sm">{view.summary.period}</p>
-        )}
-      </div>
+  const chartPlaceholder = isLoading ? (
+    <div
+      className="bg-surface-raised mt-2 w-full animate-pulse rounded"
+      style={{ height: CHART_HEIGHT }}
+    />
+  ) : (
+    <UnavailableChart height={CHART_HEIGHT} className="mt-2" />
+  );
 
-      {isLoading ? (
-        <div className="p-4">
-          <div className="bg-surface-raised h-[420px] w-full animate-pulse rounded" />
+  return (
+    <>
+      {/* KPI card: same anatomy as the Usage & Adoption row */}
+      <Card>
+        <div className="border-border-default flex items-center justify-between gap-2 border-b p-4">
+          <div className="flex items-center gap-1.5">
+            <p className="text-secondary text-sm font-medium">ENSv2</p>
+            <InfoTooltip>
+              {paragraphs(
+                "ENSv2 went live on Oct 27, 2026. Since then every registration and renewal is paid on ENSv2 contracts, in USDC or DAI, and v1 names can migrate to the ENSv2 registry.",
+                "These figures and the two charts below cover that period only, by UTC day. The launch day and the latest day are partial.",
+              )}
+            </InfoTooltip>
+          </div>
+          {view && (
+            <p className="text-secondary text-sm">
+              Since launch · {view.summary.period}
+            </p>
+          )}
         </div>
-      ) : !view ? (
-        <div className="p-4">
-          <UnavailableChart height={200} />
-        </div>
-      ) : (
-        <>
-          <div className="border-border-default grid grid-cols-1 border-b sm:grid-cols-2 lg:grid-cols-4">
-            {view.summary.kpis.map((kpi, index) => (
+
+        <div className="grid grid-cols-1 lg:grid-cols-3">
+          {Array.from({ length: KPI_COUNT }).map((_, index) => {
+            const kpi = view?.summary.kpis[index];
+            return (
               <div
-                key={kpi.title}
+                key={kpi?.title ?? index}
                 className={cn(
-                  "border-border-default p-4",
-                  index < KPI_COUNT - 1 && "border-b lg:border-b-0 lg:border-r",
+                  "p-4",
+                  index < KPI_COUNT - 1 &&
+                    "border-border-default border-b lg:border-b-0 lg:border-r",
                 )}
               >
-                <div className="flex items-center gap-1.5">
-                  <p className="text-secondary text-sm font-medium">
-                    {kpi.title}
-                  </p>
-                  <InfoTooltip>{kpi.tooltip}</InfoTooltip>
-                </div>
-                <p className="text-primary mt-1 text-[30px] font-medium leading-9">
-                  {kpi.value}
-                </p>
-                <p className="text-secondary mt-1 text-sm">{kpi.subtext}</p>
+                {isLoading ? (
+                  <>
+                    <div className="bg-surface-raised h-4 w-24 animate-pulse rounded" />
+                    <div className="bg-surface-raised mt-2 h-9 w-20 animate-pulse rounded" />
+                    <div className="bg-surface-raised mt-2 h-4 w-32 animate-pulse rounded" />
+                  </>
+                ) : kpi ? (
+                  <>
+                    <div className="flex items-center gap-1.5">
+                      <p className="text-secondary text-sm font-medium">
+                        {kpi.title}
+                      </p>
+                      <InfoTooltip>{kpi.tooltip}</InfoTooltip>
+                    </div>
+                    <p className="text-primary mt-1 text-[30px] font-medium leading-9">
+                      {kpi.value}
+                    </p>
+                    <p className="text-secondary mt-1 text-sm">{kpi.subtext}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-secondary text-sm font-medium">
+                      {UNAVAILABLE_TITLES[index]}
+                    </p>
+                    <p className="text-secondary mt-1 text-[30px] font-medium leading-9">
+                      {UNAVAILABLE_TEXT}
+                    </p>
+                    <p className="text-secondary mt-1 text-sm">
+                      Up-to-date data is not available
+                    </p>
+                  </>
+                )}
               </div>
-            ))}
-          </div>
+            );
+          })}
+        </div>
+      </Card>
 
-          <div className="grid grid-cols-1 xl:grid-cols-2">
-            <div className="border-border-default border-b p-4 xl:border-b-0 xl:border-r">
-              <div className="flex items-center gap-1.5">
-                <p className="text-secondary text-sm font-medium">
-                  Daily revenue since ENSv2
-                </p>
-                <InfoTooltip>
-                  {paragraphs(
-                    ENSV2_REVENUE_BASIS,
-                    `Formula: bars = ${code("revenue of each UTC day, by stream")}; line = ${code("running total since the launch")} (right axis).`,
-                    "The first and the latest bars are partial days. Dashed lines mark dated events.",
-                  )}
-                </InfoTooltip>
-              </div>
-              <ComboChart
-                barSeries={view.revenue.barSeries}
-                lineSeries={view.revenue.lineSeries}
-                xAxisLabels={view.revenue.xAxisLabels}
-                yAxisFormatter={formatUsd}
-                xAxisLabelInterval={view.labelInterval}
-                markers={view.markers}
-                height={CHART_HEIGHT}
-                className="mt-3"
-              />
-            </div>
-
-            <div className="p-4">
-              <div className="flex items-center gap-1.5">
-                <p className="text-secondary text-sm font-medium">
-                  Migration to ENSv2
-                </p>
-                <InfoTooltip>
-                  {paragraphs(
-                    "Bars are the v1 names migrated on each UTC day. The line is the share of v1 names migrated so far (right axis).",
-                    `Formula: ${code("names migrated since the launch ÷ reserved v1 names × 100")}`,
-                    "Reserved v1 names are the names the protocol reserved in the ENSv2 registry before the launch. The number is fixed.",
-                    "The first and the latest bars are partial days. Dashed lines mark dated events.",
-                  )}
-                </InfoTooltip>
-              </div>
-              <ComboChart
-                barSeries={view.migration.barSeries}
-                lineSeries={view.migration.lineSeries}
-                xAxisLabels={view.migration.xAxisLabels}
-                yAxisFormatter={formatCompact}
-                rightAxisFormatter={formatShareAxis}
-                xAxisLabelInterval={view.labelInterval}
-                markers={view.markers}
-                height={CHART_HEIGHT}
-                className="mt-3"
-              />
-            </div>
+      {/* Chart cards: same anatomy as the bottom row */}
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Card className="p-4">
+          <div className="flex items-center gap-1.5">
+            <p className="text-secondary text-sm font-medium">
+              Daily Revenue Since ENSv2
+            </p>
+            <InfoTooltip>
+              {paragraphs(
+                ENSV2_REVENUE_BASIS,
+                `Formula: each bar = ${code("revenue of that UTC day")}, split by stream.`,
+                "The first and the latest bars are partial days.",
+              )}
+            </InfoTooltip>
           </div>
-        </>
-      )}
-    </Card>
+          <p className="text-secondary mt-0.5 text-sm">
+            Revenue per day, by stream
+          </p>
+          {view ? (
+            <StackedBarChart
+              series={view.revenue.series}
+              xAxisLabels={view.revenue.xAxisLabels}
+              yAxisFormatter={formatUsd}
+              xAxisLabelInterval={view.labelInterval}
+              xAxisLabelFormatter={keepDayLabel}
+              tooltipTotalLabel="Total"
+              height={CHART_HEIGHT}
+              className="mt-2"
+            />
+          ) : (
+            chartPlaceholder
+          )}
+        </Card>
+
+        <Card className="p-4">
+          <div className="flex items-center gap-1.5">
+            <p className="text-secondary text-sm font-medium">
+              Migration to ENSv2
+            </p>
+            <InfoTooltip>
+              {paragraphs(
+                "Bars are the v1 names migrated on each UTC day. The line is the share of eligible v1 names migrated so far (right axis).",
+                `Formula: ${code("names migrated since the launch ÷ eligible v1 names × 100")}`,
+                "Eligible names are the v1 names the protocol reserved in the ENSv2 registry before the launch. That list is fixed.",
+                "The first and the latest bars are partial days.",
+              )}
+            </InfoTooltip>
+          </div>
+          <p className="text-secondary mt-0.5 text-sm">
+            Names migrated per day and share migrated so far
+          </p>
+          {view ? (
+            <ComboChart
+              barSeries={view.migration.barSeries}
+              lineSeries={view.migration.lineSeries}
+              xAxisLabels={view.migration.xAxisLabels}
+              yAxisFormatter={formatCompact}
+              rightAxisFormatter={formatShareAxis}
+              xAxisLabelInterval={view.labelInterval}
+              markers={view.markers}
+              height={CHART_HEIGHT}
+              className="mt-2"
+            />
+          ) : (
+            chartPlaceholder
+          )}
+        </Card>
+      </div>
+    </>
   );
 };

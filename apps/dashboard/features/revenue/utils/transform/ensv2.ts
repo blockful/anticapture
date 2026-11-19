@@ -24,14 +24,13 @@ const SECONDS_PER_DAY = 86_400;
 export const ENSV2_LAUNCH_SECONDS = Date.UTC(2026, 9, 27) / 1000;
 
 /**
- * Dated events drawn on the ENSv2 charts, so a change in the series can be
- * read against what happened that day. `date` is the UTC day start, in
- * seconds. Add campaigns and protocol changes here; an event outside the
- * charted days is not drawn.
+ * Dated events drawn on the migration chart as dashed lines, so a change in
+ * the series can be read against what happened that day. `date` is the UTC
+ * day start, in seconds. Add campaigns and protocol changes here; an event
+ * outside the charted days is not drawn. The launch itself is not listed:
+ * the charts start on it.
  */
-export const ENSV2_EVENTS: { date: number; label: string }[] = [
-  { date: ENSV2_LAUNCH_SECONDS, label: "ENSv2 launch" },
-];
+export const ENSV2_EVENTS: { date: number; label: string }[] = [];
 
 /** What ENSv2 revenue counts; shared by the ENSv2 tooltips. */
 export const ENSV2_REVENUE_BASIS =
@@ -128,15 +127,15 @@ export function summarizeEnsv2(
   const migration: Ensv2Kpi = {
     title: "Names migrated",
     value: migratedPct !== null ? formatPercent(migratedPct) : "—",
-    subtext: `${formatCompact(migrated)} of ${formatCompact(reserved)} v1 names`,
+    subtext: `${formatCompact(migrated)} of ${formatCompact(reserved)} eligible v1 names`,
     tooltip: paragraphs(
-      "Share of v1 .eth names that moved to ENSv2. A name is migrated when a migration controller registers it in the ENSv2 registry. Migrating is not a payment and adds no revenue.",
-      `Formula: ${code("migrated names ÷ reserved v1 names × 100")}`,
+      "Share of the v1 .eth names eligible to migrate that have moved to ENSv2. A name is migrated when a migration controller registers it in the ENSv2 registry. Migrating is not a payment and adds no revenue.",
+      `Formula: ${code("migrated names ÷ eligible v1 names × 100")}`,
       migratedPct !== null &&
         code(
           `${formatInteger(migrated)} ÷ ${formatInteger(reserved)} × 100 = ${formatPercent(migratedPct)}`,
         ),
-      "Reserved v1 names are the names the protocol reserved in the ENSv2 registry before the launch, so they could migrate. The number is fixed. It includes names that have expired since without migrating, so the share cannot reach 100%.",
+      "Eligible names are the v1 names the protocol reserved in the ENSv2 registry before the launch. That list is fixed. It includes names that had already expired but were still in their grace period, so it is larger than the active names count, and names that expire without migrating stay in it.",
       window,
     ),
   };
@@ -159,31 +158,7 @@ export function summarizeEnsv2(
     ),
   };
 
-  // --- Renewals
-  const renewalCount = sumBy(sorted, (item) => item.renewals);
-  const unmigratedCount = sumBy(sorted, (item) => item.renewalsUnmigrated);
-  const unmigratedShare =
-    renewalCount > 0 ? (unmigratedCount / renewalCount) * 100 : null;
-  const renewals: Ensv2Kpi = {
-    title: "Renewals since ENSv2",
-    value: formatCompact(renewalCount),
-    subtext:
-      unmigratedShare !== null
-        ? `${formatPercent(unmigratedShare, 0)} by names not migrated yet`
-        : "No renewals yet",
-    tooltip: paragraphs(
-      "Paid renewals since the ENSv2 launch. A v1 name can be renewed without migrating, through the v1 renewer. A migrated or ENSv2-registered name renews on the ENSv2 registrar.",
-      `Formula: ${code("sum of daily renewals")} = ${code(formatInteger(renewalCount))}`,
-      `Share by names not migrated: ${code("renewals through the v1 renewer ÷ all renewals × 100")}`,
-      unmigratedShare !== null &&
-        code(
-          `${formatInteger(unmigratedCount)} ÷ ${formatInteger(renewalCount)} × 100 = ${formatPercent(unmigratedShare, 0)}`,
-        ),
-      window,
-    ),
-  };
-
-  return { period, kpis: [revenue, migration, registrations, renewals] };
+  return { period, kpis: [revenue, migration, registrations] };
 }
 
 /** About eight x-axis labels however many days are charted. */
@@ -219,47 +194,35 @@ export function toEnsv2Markers(
   });
 }
 
-/** Daily revenue by stream (stacked bars) and the running total (line). */
+/** Daily revenue by stream, in the colours of the all-time revenue chart. */
 export function transformToEnsv2Revenue(items: RevenueEnsv2DailyItem[]) {
   const sorted = byDate(items);
   return {
     xAxisLabels: toDayLabels(sorted),
-    barSeries: [
+    series: [
       {
         name: "Registration",
-        valueFormatter: formatUsdExact,
         data: sorted.map((item) => item.registrationUsd),
         color: "#0080bc",
-        stack: "revenue",
       },
       {
         name: "Renewals",
-        valueFormatter: formatUsdExact,
         data: sorted.map((item) => item.renewalUsd),
         color: "#15803d",
-        stack: "revenue",
       },
       {
         name: "Premium",
-        valueFormatter: formatUsdExact,
         data: sorted.map((item) => item.premiumUsd),
         color: "#f472b6",
-        stack: "revenue",
-      },
-    ],
-    lineSeries: [
-      {
-        name: "Cumulative revenue",
-        valueFormatter: formatUsdExact,
-        data: sorted.map((item) => item.cumulativeUsd),
-        color: "#f59e0b",
-        smooth: false,
       },
     ],
   };
 }
 
-/** Names migrated per day (bars) and the migrated share of v1 names (line). */
+/**
+ * Names migrated per day (bars) and the migrated share of eligible v1 names
+ * (line), in the colours of the other bar-and-line charts on the page.
+ */
 export function transformToEnsv2Migration(items: RevenueEnsv2DailyItem[]) {
   const sorted = byDate(items);
   return {
@@ -269,15 +232,15 @@ export function transformToEnsv2Migration(items: RevenueEnsv2DailyItem[]) {
         name: "Names migrated (day)",
         valueFormatter: formatInteger,
         data: sorted.map((item) => item.namesMigrated),
-        color: "#a855f7",
+        color: "#15803d",
       },
     ],
     lineSeries: [
       {
-        name: "Migrated share of v1 names",
+        name: "Migrated share of eligible names",
         valueFormatter: (value: number) => formatPercent(value),
         data: sorted.map((item) => item.migratedPct),
-        color: "#f59e0b",
+        color: "#0080bc",
         smooth: false,
       },
     ],
