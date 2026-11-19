@@ -6,7 +6,6 @@ import { LIL_NOUNS } from "@/shared/dao-config/lil-nouns";
 import { NOUNS } from "@/shared/dao-config/nouns";
 import { OBOL } from "@/shared/dao-config/obol";
 import { OP } from "@/shared/dao-config/op";
-import { SCR } from "@/shared/dao-config/scr";
 import { SHU } from "@/shared/dao-config/shu";
 import { TORN } from "@/shared/dao-config/torn";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
@@ -74,7 +73,6 @@ const rawDaoConfigByDaoId = {
   LIL_NOUNS,
   OP,
   GTC,
-  SCR,
   NOUNS,
   COMP,
   OBOL,
