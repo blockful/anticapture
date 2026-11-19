@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.17.5
+
+### Patch Changes
+
+- [#2195](https://github.com/blockful/anticapture/pull/2195) [`daf05a6`](https://github.com/blockful/anticapture/commit/daf05a6eab37d0276d47e1c98c2bedbb9b490ccf) Thanks [@alextnetto](https://github.com/alextnetto)! - The Service Providers page now loads its data through the dashboard's own server instead of calling raw.githubusercontent.com from the browser. Visitors on networks that block that host, or on VPN addresses GitHub refuses, saw "Unable to load service provider data".
+
 ## 2.17.4
 
 ### Patch Changes
