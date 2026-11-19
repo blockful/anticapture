@@ -1,12 +1,7 @@
-import {
-  GITHUB_API_BASE,
-  GITHUB_RAW_BASE,
-} from "@/features/service-providers/constants/github";
 import type {
   ParsedQuarter,
   ProgramConfig,
   ProgramDefinition,
-  ProgramsConfig,
   ProviderEntry,
   ProvidersConfig,
   QuarterKey,
@@ -14,6 +9,10 @@ import type {
   YearData,
 } from "@/features/service-providers/types";
 import { computeQuarterStatus } from "@/features/service-providers/utils/computeQuarterStatus";
+import {
+  fetchSppSource,
+  type SppSource,
+} from "@/features/service-providers/utils/fetchSppSource";
 import { isHttpUrl } from "@/features/service-providers/utils/isHttpUrl";
 
 const QUARTERS: QuarterKey[] = ["Q1", "Q2", "Q3", "Q4"];
@@ -100,48 +99,31 @@ export const buildProgramData = (
     ]),
   );
 
-const fetchJson = async <T>(path: string): Promise<T> => {
-  const response = await fetch(`${GITHUB_RAW_BASE}/${path}`);
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${path}: ${response.status}`);
-  }
-  return (await response.json()) as T;
-};
+export const SERVICE_PROVIDERS_API_PATH = "/api/service-providers";
 
-const fetchAvatarUrls = async (): Promise<Record<string, string>> => {
+/**
+ * Reads the source files through this app's own server, which is reachable
+ * wherever the dashboard is. If that route fails, falls back to reading GitHub
+ * from the browser, which is what the page did before and still works on most
+ * networks.
+ */
+export const fetchSource = async (
+  fetchImpl: typeof fetch = fetch,
+): Promise<SppSource> => {
   try {
-    const response = await fetch(
-      `${GITHUB_API_BASE}/git/trees/main?recursive=1`,
-    );
-    if (!response.ok) return {};
-
-    const { tree }: { tree: { path: string; type: string }[] } =
-      await response.json();
-
-    return Object.fromEntries(
-      tree
-        .filter(
-          (item) =>
-            item.type === "blob" && /^avatars\/[^/]+\.[^.]+$/.test(item.path),
-        )
-        .map((item) => {
-          const fileName = item.path.slice("avatars/".length);
-          const slug = fileName.slice(0, fileName.lastIndexOf("."));
-          return [slug, `${GITHUB_RAW_BASE}/${item.path}`];
-        }),
-    );
+    const response = await fetchImpl(SERVICE_PROVIDERS_API_PATH);
+    if (!response.ok) {
+      throw new Error(`${SERVICE_PROVIDERS_API_PATH}: ${response.status}`);
+    }
+    return (await response.json()) as SppSource;
   } catch {
-    return {};
+    return fetchSppSource((url) => fetchImpl(url));
   }
 };
 
 export const fetchServiceProvidersData =
   async (): Promise<ServiceProvidersResult> => {
-    const [config, programsConfig, avatarUrls] = await Promise.all([
-      fetchJson<ProvidersConfig>("providers.json"),
-      fetchJson<ProgramsConfig>("programs.json"),
-      fetchAvatarUrls(),
-    ]);
+    const { config, programsConfig, avatarUrls } = await fetchSource();
 
     const programs = Object.fromEntries(
       Object.entries(programsConfig.programs).map(([key, value]) => [
