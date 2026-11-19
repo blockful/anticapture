@@ -6,7 +6,13 @@ type CacheEntry<T> = {
   data: T;
 };
 
-export const REVENUE_CACHE_TTL_MS = 60 * 60 * 1000 * 24; // 24 hours
+/**
+ * How long a Dune result is served before it is read again. The queries are
+ * refreshed daily, so 6 hours keeps the data served at most about 30 hours
+ * old, under the 36-hour "Data delayed" threshold; a 24-hour cache let it
+ * reach 48 hours on a normal day.
+ */
+export const REVENUE_CACHE_TTL_MS = 60 * 60 * 1000 * 6;
 
 /**
  * Short lease put on a stale entry after an upstream failure. It stops every
