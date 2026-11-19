@@ -34,6 +34,11 @@ describe("health controller", () => {
 
   beforeAll(async () => {
     client = new PGlite();
+    // PGlite boots its WASM Postgres on first use. Nothing else here waits for
+    // it, so without this the boot lands inside the first test and its 5 s
+    // limit, which a busy runner misses. In the hook it has the 30 s of
+    // `hookTimeout`, like the suites that push a schema.
+    await client.waitReady;
     db = drizzle(client, { schema });
 
     app = new Hono();
