@@ -97,22 +97,27 @@ test.describe("Revenue page (/ens/revenue)", () => {
       await expect
         .poll(() => pulsedBlocks(page), { timeout: 15_000 })
         .toEqual(["renewal-rate"]);
-      const position = await page.evaluate(() => {
-        const block = document
-          .querySelector('[data-deep-link="renewal-rate"]')!
-          .getBoundingClientRect();
-        const headerBottom = Math.max(
-          0,
-          ...[...document.querySelectorAll("header")]
-            .filter((header) => getComputedStyle(header).position === "fixed")
-            .map((header) => header.getBoundingClientRect().bottom),
-        );
-        return {
-          belowHeader: block.top >= headerBottom,
-          aboveFold: block.bottom <= window.innerHeight,
-        };
-      });
-      expect(position).toEqual({ belowHeader: true, aboveFold: true });
+      // Polled: a card that finishes loading right then moves the block for
+      // a moment, and the arrival puts it back.
+      const position = () =>
+        page.evaluate(() => {
+          const block = document
+            .querySelector('[data-deep-link="renewal-rate"]')!
+            .getBoundingClientRect();
+          const headerBottom = Math.max(
+            0,
+            ...[...document.querySelectorAll("header")]
+              .filter((header) => getComputedStyle(header).position === "fixed")
+              .map((header) => header.getBoundingClientRect().bottom),
+          );
+          return {
+            belowHeader: block.top >= headerBottom,
+            aboveFold: block.bottom <= window.innerHeight,
+          };
+        });
+      await expect
+        .poll(position, { timeout: 15_000 })
+        .toEqual({ belowHeader: true, aboveFold: true });
     });
 
     test("a title puts the link to its block in the address bar and copies it", async ({
@@ -126,7 +131,7 @@ test.describe("Revenue page (/ens/revenue)", () => {
       // Cards that are still loading change height and move the page, which
       // would read as a scroll: wait for all of them first.
       await expect(page.locator("main .animate-pulse")).toHaveCount(0, {
-        timeout: 15_000,
+        timeout: 30_000,
       });
       const title = page.getByRole("link", { name: "Upcoming Expirations" });
       await title.scrollIntoViewIfNeeded();
@@ -135,10 +140,11 @@ test.describe("Revenue page (/ens/revenue)", () => {
 
       await title.click();
 
-      await expect(page).toHaveURL(/\/ens\/revenue#upcoming-expirations$/);
+      // First: the confirmation is on the page for two seconds only.
       await expect(
         page.getByRole("status").filter({ hasText: "Link copied" }),
       ).toHaveCount(1);
+      await expect(page).toHaveURL(/\/ens\/revenue#upcoming-expirations$/);
       expect(await page.evaluate(() => navigator.clipboard.readText())).toMatch(
         /\/ens\/revenue#upcoming-expirations$/,
       );

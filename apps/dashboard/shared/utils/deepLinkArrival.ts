@@ -10,8 +10,8 @@ const TICK_MS = 120;
 const SCROLL_IDLE_MS = 120;
 /** A scroll that has not moved the block after this long is asked for again. */
 const SCROLL_RETRY_MS = 600;
-/** How long to wait for the block to be on the page. */
-const FIND_TIMEOUT_MS = 5_000;
+/** Give up when the block has not been reached after this long. */
+const ARRIVE_TIMEOUT_MS = 10_000;
 /** How long after arriving the block is kept in place while the page loads. */
 const SETTLE_MS = 8_000;
 /** Longer than the animation in globals.css, so the attribute outlives it. */
@@ -48,6 +48,9 @@ export function pulseDeepLinkTarget(target: HTMLElement): void {
  * few seconds, and the scroll is repeated whenever it has moved. It stops as
  * soon as the reader scrolls, clicks or types: from then on the page is
  * theirs.
+ *
+ * Nothing happens while the tab is in the background, so a link opened in a
+ * new tab still scrolls and pulses when the reader gets to it.
  */
 export function startDeepLinkArrival(slug: string | null): () => void {
   if (!slug) return () => {};
@@ -58,8 +61,9 @@ export function startDeepLinkArrival(slug: string | null): () => void {
   ).matches
     ? "auto"
     : "smooth";
-  const startedAt = performance.now();
 
+  /** First moment the tab was visible: the deadline counts from there. */
+  let startedAt: number | null = null;
   let target: HTMLElement | null = null;
   let lastScrollAt = 0;
   /** The block's position and height when the last scroll was asked for, and when. */
@@ -81,9 +85,19 @@ export function startDeepLinkArrival(slug: string | null): () => void {
     }
   };
 
+  const isInView = (rect: DOMRect) =>
+    rect.top < window.innerHeight && rect.bottom > 0;
+
   const onTakeover = () => {
-    // Interrupted on the way: still show which block the link meant.
-    if (target && arrivedAt === null) pulseDeepLinkTarget(target);
+    // Interrupted on the way: still show which block the link meant, when it
+    // is already on screen.
+    if (
+      target &&
+      arrivedAt === null &&
+      isInView(target.getBoundingClientRect())
+    ) {
+      pulseDeepLinkTarget(target);
+    }
     stop();
   };
 
@@ -97,21 +111,29 @@ export function startDeepLinkArrival(slug: string | null): () => void {
   };
 
   const tick = () => {
+    // The scroll and the pulse are for a reader who is looking at the page.
+    if (document.visibilityState !== "visible") return;
+
     const now = performance.now();
+    startedAt ??= now;
+    // The block is missing, hidden, or cannot be brought into view.
+    if (arrivedAt === null && now - startedAt > ARRIVE_TIMEOUT_MS) {
+      stop();
+      return;
+    }
 
     if (!target || !target.isConnected) {
       target = document.querySelector<HTMLElement>(selector);
       scrolledFrom = null;
-      if (!target) {
-        if (now - startedAt > FIND_TIMEOUT_MS) stop();
-        return;
-      }
+      if (!target) return;
     }
 
     // A scroll is in progress: wait for it to end.
     if (now - lastScrollAt < SCROLL_IDLE_MS) return;
 
     const rect = target.getBoundingClientRect();
+    // Not rendered (display: none): there is nowhere to scroll to yet.
+    if (rect.width === 0 && rect.height === 0) return;
     const moved =
       scrolledFrom === null ||
       Math.abs(rect.top - scrolledFrom.top) > TOLERANCE_PX ||
@@ -124,8 +146,7 @@ export function startDeepLinkArrival(slug: string | null): () => void {
       return;
     }
 
-    const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    if (!inView) {
+    if (!isInView(rect)) {
       // The scroll was asked for and has not started. Ask again if it never does.
       if (scrolledFrom && now - scrolledFrom.at > SCROLL_RETRY_MS) {
         scrollToTarget(target, rect, now);
