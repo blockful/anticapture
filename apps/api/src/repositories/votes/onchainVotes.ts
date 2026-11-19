@@ -40,6 +40,9 @@ export class VotesRepository {
         : undefined,
       req.toDate ? lte(votesOnchain.timestamp, BigInt(req.toDate)) : undefined,
       req.support ? eq(votesOnchain.support, req.support) : undefined,
+      req.voterAddressIn?.length
+        ? inArray(votesOnchain.voterAccountId, req.voterAddressIn)
+        : undefined,
     );
 
     const [items, totalCount] = await Promise.all([

@@ -137,7 +137,9 @@ export const AddressSchema = z
 export const AddressArraySchema = z.array(AddressSchema);
 
 export const AddressQueryArraySchema = z
-  .union([AddressSchema.transform((val) => [val]), AddressArraySchema])
+  .union([z.string(), z.array(z.string())])
+  .transform((value) => (normalizeQueryArray(value) ?? []).map(String))
+  .pipe(AddressArraySchema)
   .openapi({ type: "array", items: { type: "string" } });
 
 export const unixTimestampQueryParam = (description: string) =>

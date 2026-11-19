@@ -174,7 +174,7 @@ export const TabsVotedContent = ({
             <div className="flex h-10 w-full items-center gap-3 p-2">
               <button
                 onClick={() => onAddressClick?.(voterAddress)}
-                className="group cursor-pointer"
+                className="group min-w-0 cursor-pointer"
               >
                 <EnsAvatar
                   address={voterAddress as `0x${string}`}
@@ -186,7 +186,7 @@ export const TabsVotedContent = ({
                 />
               </button>
               <CopyAndPasteButton
-                className="size-2"
+                className="size-2 shrink-0"
                 textToCopy={voterAddress}
               />
             </div>
@@ -204,7 +204,7 @@ export const TabsVotedContent = ({
       },
       {
         accessorKey: "support",
-        size: 120,
+        size: 100,
         cell: ({ row }) => {
           const support = row.getValue("support") as string;
           const voterAddress = row.getValue("voterAddress") as string;
@@ -587,14 +587,14 @@ export const TabsVotedContent = ({
       },
       {
         accessorKey: "transactionHash",
-        size: 40,
+        size: 48,
         cell: ({ row }) => {
           const transactionHash = row.getValue("transactionHash") as string;
 
           // Handle skeleton data (empty objects from initial load)
           if (!transactionHash) {
             return (
-              <div className="flex h-10 items-center justify-center p-2">
+              <div className="flex h-10 items-center justify-end py-2 pl-2 pr-4">
                 <SkeletonRow
                   parentClassName="flex animate-pulse"
                   className="size-3.5"
@@ -609,7 +609,7 @@ export const TabsVotedContent = ({
               ?.default?.url ?? "https://etherscan.io";
 
           return (
-            <div className="flex h-10 items-center justify-center p-2">
+            <div className="flex h-10 items-center justify-end py-2 pl-2 pr-4">
               <Link
                 href={`${blockExplorerUrl}/tx/${transactionHash}`}
                 target="_blank"

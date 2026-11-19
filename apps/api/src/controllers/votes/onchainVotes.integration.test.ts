@@ -305,6 +305,51 @@ describe("Onchain Votes Controller", () => {
       const body = await res.json();
       expect(body).toEqual({ items: [FULL_VOTE_OBJECT], totalCount: 1 });
     });
+
+    it("should accept voterAddressIn filter", async () => {
+      await db.insert(proposalsOnchain).values(createProposal({ id: "1" }));
+      await db.insert(votesOnchain).values([
+        createVote({ proposalId: "1", voterAccountId: VOTER_ADDRESS }),
+        createVote({
+          proposalId: "1",
+          voterAccountId: SECOND_VOTER,
+          txHash: "0xdef456",
+        }),
+      ]);
+
+      const res = await app.request(`/votes?voterAddressIn=${VOTER_ADDRESS}`);
+
+      expect(res.status).toBe(200);
+      const body = await res.json();
+      expect(body).toEqual({ totalCount: 1, items: [FULL_VOTE_OBJECT] });
+    });
+
+    it("should accept voterAddressIn as repeated and comma-delimited params", async () => {
+      await db.insert(proposalsOnchain).values(createProposal({ id: "1" }));
+      await db.insert(votesOnchain).values([
+        createVote({ proposalId: "1", voterAccountId: VOTER_ADDRESS }),
+        createVote({
+          proposalId: "1",
+          voterAccountId: SECOND_VOTER,
+          txHash: "0xdef456",
+        }),
+      ]);
+
+      for (const query of [
+        `voterAddressIn=${VOTER_ADDRESS}&voterAddressIn=${SECOND_VOTER}`,
+        `voterAddressIn=${VOTER_ADDRESS},${SECOND_VOTER}`,
+      ]) {
+        const res = await app.request(`/votes?${query}`);
+
+        expect(res.status).toBe(200);
+        const body = await res.json();
+        expect(body.totalCount).toBe(2);
+        const voters = body.items
+          .map((item: { voterAddress: string }) => item.voterAddress)
+          .sort();
+        expect(voters).toEqual([VOTER_ADDRESS, SECOND_VOTER].sort());
+      }
+    });
   });
 
   describe("GET /proposals/{id}/non-voters", () => {
