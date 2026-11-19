@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   isGatefulReady,
+  isOnlyToleratedDown,
   resolveExpectedGatefulSha,
   resolveGatefulBaseUrl,
   staleUpstreams,
@@ -279,4 +280,71 @@ test("a gateful with no commit is stale, not ready", () => {
 
   // With no expected SHA (untrusted PRs) reachability is still enough.
   assert.equal(isGatefulReady(health, undefined, {}), true);
+});
+
+const degraded = (upstreams) => ({
+  status: 503,
+  body: { status: "degraded", commit: "new", upstreams },
+});
+const okDao = { kind: "dao-api", status: "ok", commit: "new" };
+const downDao = { kind: "dao-api", status: "down", error: "circuit open" };
+
+test("a down upstream blocks unless it is named as tolerated", () => {
+  const health = degraded({ ens: okDao, scr: downDao });
+  const stale = { "dao-api": ["old"] };
+
+  assert.equal(isGatefulReady(health, "new", stale, [], []), false);
+  assert.equal(isGatefulReady(health, "new", stale, [], ["scr"]), true);
+});
+
+test("tolerating one upstream does not excuse another that is down", () => {
+  const health = degraded({ ens: okDao, scr: downDao, aave: downDao });
+
+  assert.equal(isOnlyToleratedDown(health, ["scr"]), false);
+  assert.equal(
+    isGatefulReady(health, "new", { "dao-api": ["old"] }, [], ["scr"]),
+    false,
+  );
+});
+
+test("a tolerated list never excuses a stale upstream that is up", () => {
+  const health = degraded({
+    ens: { kind: "dao-api", status: "ok", commit: "old" },
+    scr: downDao,
+  });
+
+  assert.equal(
+    isGatefulReady(health, "new", { "dao-api": ["old"] }, [], ["scr"]),
+    false,
+  );
+  assert.deepEqual(staleUpstreams(health, { "dao-api": ["old"] }, ["scr"]), [
+    "ens",
+  ]);
+});
+
+test("a tolerated upstream is checked again once it answers", () => {
+  const health = {
+    status: 200,
+    body: {
+      status: "ok",
+      commit: "new",
+      upstreams: { scr: { kind: "dao-api", status: "ok", commit: "old" } },
+    },
+  };
+
+  assert.equal(
+    isGatefulReady(health, "new", { "dao-api": ["old"] }, [], ["scr"]),
+    false,
+  );
+});
+
+test("a 503 that is not gateful's own degraded report still blocks", () => {
+  assert.equal(
+    isOnlyToleratedDown({ status: 503, body: undefined }, ["scr"]),
+    false,
+  );
+  assert.equal(
+    isOnlyToleratedDown({ status: 502, body: { status: "degraded" } }, ["scr"]),
+    false,
+  );
 });
