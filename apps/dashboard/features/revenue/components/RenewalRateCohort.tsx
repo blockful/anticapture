@@ -14,7 +14,8 @@ import { formatUtcDate } from "@/features/revenue/utils/format";
 import { toRenewalCohortCutoff } from "@/features/revenue/utils/meta";
 import { transformToRenewalCohorts } from "@/features/revenue/utils/transform";
 
-const cohortColor = (rate: number) => (rate >= 65 ? "#15803d" : "#ca8a04");
+/** The Renewals colour of the revenue charts. One colour: the bar length carries the value. */
+const COHORT_COLOR = "#15803d";
 
 export const RenewalRateCohort = () => {
   const funnelQuery = useGetRevenueRenewalFunnel("ens");
@@ -67,16 +68,12 @@ export const RenewalRateCohort = () => {
                 </span>
                 <span
                   className="text-sm font-medium"
-                  style={{ color: cohortColor(cohort.rate) }}
+                  style={{ color: COHORT_COLOR }}
                 >
                   {cohort.rate}%
                 </span>
               </div>
-              <ProgressBar
-                value={cohort.rate}
-                color={cohortColor(cohort.rate)}
-                rounded
-              />
+              <ProgressBar value={cohort.rate} color={COHORT_COLOR} rounded />
             </div>
           ))
         )}

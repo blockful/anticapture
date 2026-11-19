@@ -68,7 +68,7 @@ describe("summarizeEnsv2 on the live data (asOf 2026-11-19T15:50:49Z)", () => {
   it("Names migrated: migrated ÷ reserved v1 names", () => {
     const migration = byTitle(summary.kpis, "Names migrated");
     expect(migration.value).toBe("3.40%");
-    expect(migration.subtext).toBe("31.3K of 919.7K v1 names");
+    expect(migration.subtext).toBe("31.3K of 919.7K eligible v1 names");
     expect(migration.tooltip).toContain("`31,310 ÷ 919,728 × 100 = 3.40%`");
   });
 
@@ -84,11 +84,12 @@ describe("summarizeEnsv2 on the live data (asOf 2026-11-19T15:50:49Z)", () => {
     );
   });
 
-  it("Renewals: count and the share made by names that have not migrated", () => {
-    const renewals = byTitle(summary.kpis, "Renewals since ENSv2");
-    expect(renewals.value).toBe("15.2K");
-    expect(renewals.subtext).toBe("97% by names not migrated yet");
-    expect(renewals.tooltip).toContain("`14,783 ÷ 15,241 × 100 = 97%`");
+  it("shows three figures: revenue, migration and registrations", () => {
+    expect(summary.kpis.map((kpi) => kpi.title)).toEqual([
+      "Revenue since ENSv2",
+      "Names migrated",
+      "New ENSv2 registrations",
+    ]);
   });
 
   it("writes every tooltip as paragraphs, the window last", () => {
@@ -141,16 +142,13 @@ describe("summarizeEnsv2 edge cases", () => {
     expect(revenue.tooltip).toContain("`$400 ÷ 2 = $200`");
   });
 
-  it("never divides by zero: no reserved names, no renewals", () => {
+  it("never divides by zero when no name was reserved", () => {
     const summary = summarizeEnsv2(
       [day(0, { reservedNames: 0 }), day(1, { reservedNames: 0 })],
       new Date((ENSV2_LAUNCH_SECONDS + 2 * DAY) * 1000),
       true,
     );
     expect(byTitle(summary?.kpis ?? [], "Names migrated").value).toBe("—");
-    expect(byTitle(summary?.kpis ?? [], "Renewals since ENSv2").subtext).toBe(
-      "No renewals yet",
-    );
   });
 
   it("does not depend on the order of the rows", () => {
@@ -186,23 +184,17 @@ describe("fullDays", () => {
 });
 
 describe("ENSv2 chart series", () => {
-  it("revenue: one stacked bar per stream and day, plus the running total", () => {
+  it("revenue: one stacked bar per stream and day, in the all-time chart's colours", () => {
     const chart = transformToEnsv2Revenue(liveEnsv2Daily);
     expect(chart.xAxisLabels[0]).toBe("Oct 27");
     expect(chart.xAxisLabels).toHaveLength(24);
-    expect(chart.barSeries.map((s) => s.name)).toEqual([
-      "Registration",
-      "Renewals",
-      "Premium",
+    expect(chart.series.map((s) => [s.name, s.color])).toEqual([
+      ["Registration", "#0080bc"],
+      ["Renewals", "#15803d"],
+      ["Premium", "#f472b6"],
     ]);
-    expect(new Set(chart.barSeries.map((s) => s.stack))).toEqual(
-      new Set(["revenue"]),
-    );
     // Oct 28: 8573.69 + 11808.69 + 0 = 20382.38
-    expect(chart.barSeries.map((s) => s.data[1])).toEqual([
-      8573.69, 11808.69, 0,
-    ]);
-    expect(chart.lineSeries[0].data[23]).toBe(218370.84);
+    expect(chart.series.map((s) => s.data[1])).toEqual([8573.69, 11808.69, 0]);
   });
 
   it("migration: names per day and the migrated share", () => {
@@ -214,10 +206,11 @@ describe("ENSv2 chart series", () => {
     expect(share.every((v, i) => i === 0 || v >= share[i - 1])).toBe(true);
   });
 
+  it("draws no marker by default: the charts start on the launch", () => {
+    expect(toEnsv2Markers(liveEnsv2Daily)).toEqual([]);
+  });
+
   it("marks an event at the position of its day, and only if it is charted", () => {
-    expect(toEnsv2Markers(liveEnsv2Daily)).toEqual([
-      { index: 0, label: "ENSv2 launch" },
-    ]);
     expect(
       toEnsv2Markers(liveEnsv2Daily, [
         { date: ENSV2_LAUNCH_SECONDS + 3 * DAY, label: "Campaign" },

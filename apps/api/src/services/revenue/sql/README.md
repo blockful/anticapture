@@ -383,3 +383,15 @@ was registered again on ENSv2 is a registration, not a migration.
 - `registrations` sum to 3,471. At 3,468, 587 were on labels that had been reserved.
 - `renewals` sum to 15,241, of which 14,783 on ETHRenewerV1. No zero-amount payment event exists so far.
 - Cost: 1 to 3 credits per run.
+
+### Why `reserved_names` is larger than the active names count
+
+`reserved_names` (919,728) is the list of v1 names that could migrate, fixed at the launch. It is not the number of
+active names. By the same interval logic as `active_names.sql`, at the launch (2026-10-27 06:01:59 UTC):
+
+- 781,187 names were inside a paid term;
+- 117,442 had expired but were still in their 90-day grace period, so their owners could still renew them;
+- the remaining 21,099 were reserved earlier in October and their grace period ran out before the launch.
+
+The dashboard calls them "eligible v1 names" and says in the tooltip that the list includes names in their grace
+period.
