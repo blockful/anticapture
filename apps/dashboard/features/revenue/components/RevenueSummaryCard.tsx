@@ -12,6 +12,7 @@ import { cn } from "@/shared/utils/cn";
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import type { RevenueTimeframe } from "@/features/revenue/types";
+import { REVENUE_BASIS } from "@/features/revenue/utils/copy";
 import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
 import { computeRevenueSummary } from "@/features/revenue/utils/transform";
 
@@ -20,9 +21,6 @@ const TIMEFRAME_OPTIONS: { label: string; value: RevenueTimeframe }[] = [
   { label: "YTD", value: "ytd" },
   { label: "MAX", value: "max" },
 ];
-
-const REVENUE_BASIS =
-  "Counts .eth registrations, renewals and premiums paid to the v1 ETH registrar controllers, when paid; ETH converted to USD at each month's average ETH price. 2023-controller renewals outside Dec 2024 to Sep 2025 are counted at the amount sent, before refunds of overpayment. Payments through ENSv2 (from Oct 27, 2026, in USDC or DAI) are not yet included.";
 
 export const RevenueSummaryCard = () => {
   const [timeframe, setTimeframe] = useState<RevenueTimeframe>("1y");
@@ -53,8 +51,10 @@ export const RevenueSummaryCard = () => {
                 Protocol Revenue (actual)
               </p>
               <InfoTooltip>
-                Protocol revenue in the selected period
-                {summary ? ` (${summary.actualPeriod})` : ""}. {REVENUE_BASIS}
+                Sum of the monthly protocol revenue in the selected period
+                {summary ? ` (${summary.actualPeriod})` : ""}. 1Y is the last 12
+                full months before the data cutoff; YTD and MAX run up to the
+                cutoff, so their latest month is partial. {REVENUE_BASIS}
               </InfoTooltip>
             </div>
             <SegmentedControl
@@ -104,9 +104,9 @@ export const RevenueSummaryCard = () => {
             <InfoTooltip>
               Average daily protocol revenue in the last 3 full months covered
               by the data
-              {summary ? ` (${summary.runRatePeriod})` : ""}, multiplied by 365.{" "}
-              {REVENUE_BASIS} A run rate annualizes recent revenue; it is not a
-              forecast.
+              {summary ? ` (${summary.runRatePeriod})` : ""}, multiplied by 365
+              {summary ? `: ${summary.runRateFormula}` : ""}. {REVENUE_BASIS} A
+              run rate annualizes recent revenue; it is not a forecast.
             </InfoTooltip>
           </div>
           {isLoading ? (
@@ -129,7 +129,11 @@ export const RevenueSummaryCard = () => {
                   tooltipContent={
                     <p className="text-secondary text-left text-sm font-normal leading-5">
                       Change in average daily revenue vs the previous 3 full
-                      months ({summary.qoqDelta.previousPeriod}).
+                      months ({summary.qoqDelta.previousPeriod})
+                      {summary.qoqDelta.formula
+                        ? `: ${summary.qoqDelta.formula}`
+                        : ""}
+                      .
                     </p>
                   }
                   triggerClassName="cursor-help"

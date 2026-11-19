@@ -42,11 +42,11 @@ export type KpiSeries<T> = {
 
 export const KPI_DESCRIPTIONS = {
   newWallets:
-    "First-time wallets: each wallet is counted once, in the month it first sent a registration or renewal transaction to a .eth registrar controller (May 2019 onward). The wallet is the transaction sender, not necessarily the name owner.",
+    "New registrants: each address is counted once, in the month it first becomes the owner of a newly registered .eth name (first paid registration on the v1 ETH registrar controllers, from May 2019, or on ENSv2). Renewals do not add wallets. Formula: sum of the monthly new registrants in the window.",
   renewalRate:
-    "Share of .eth registration terms expiring in the window that were renewed before the end of their grace period (expiry + 90 days), weighted by the number of terms. Each registration or renewal is one term, grouped by the month it expires.",
+    "Share of .eth registration terms expiring in the window that were renewed before the end of their grace period (90 days after expiry; 28 days for names registered on ENSv2), weighted by the number of terms. Each registration or renewal is one term, grouped by the month it expires. Names registered before ENSv2 use their v1 expiry here (their ENSv2 expiry minus 62 days). A renewal that leaves the name still expired (a grace-period top-up) is not a term. Formula: renewed terms ÷ expiring terms × 100, both summed over the window.",
   revenue:
-    "Protocol revenue from .eth registrations, renewals and premiums paid to the v1 ETH registrar controllers, counted when paid. ETH is converted to USD at each month's average ETH price. 2023-controller renewals outside Dec 2024 to Sep 2025 are counted at the amount sent, before refunds of overpayment. Payments through ENSv2 (from Oct 27, 2026, in USDC or DAI) are not yet included.",
+    "Protocol revenue from .eth registrations, renewals and premiums, counted when paid, on the v1 ETH registrar controllers and on ENSv2. ETH is converted to USD at the hourly ETH price; USDC and DAI at face value. Formula: sum of the monthly revenue in the window.",
 } as const;
 
 const formatWindow = (window: CalendarWindow): string =>
@@ -127,7 +127,11 @@ function buildFlowKpi<T extends { date: number }>(args: {
   const windowText = `Window: ${formatWindow(windows.current)} (${args.window.months} full months ${args.windowEndNote})`;
   const comparisonText =
     previousValue !== null
-      ? `, compared with ${formatWindow(windows.previous)}.`
+      ? `, compared with ${formatWindow(windows.previous)}. ${
+          args.deltaKind === "pct"
+            ? "Change = (window ÷ previous window − 1) × 100."
+            : "Change = window rate − previous window rate, in percentage points."
+        }`
       : ". The data does not cover an earlier window to compare with.";
 
   return {

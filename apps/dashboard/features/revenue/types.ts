@@ -33,12 +33,16 @@ export type RevenueSummary = {
   runRate: string;
   /** The 3 full months the run rate averages, e.g. "Jun to Aug 2026". */
   runRatePeriod: string;
+  /** The arithmetic behind the run rate, e.g. "$1,130,483 ÷ 92 days × 365 = $4,485,069". */
+  runRateFormula: string;
   qoqDelta?: {
     pct: number;
     text: string;
     trend: "up" | "down";
     /** The 3 full months compared against, e.g. "Mar to May 2026". */
     previousPeriod: string;
+    /** The arithmetic behind the delta, in average daily revenue. */
+    formula: string;
   };
 };
 

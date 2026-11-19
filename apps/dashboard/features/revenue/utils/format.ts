@@ -141,3 +141,13 @@ export const formatCutoffEnd = (cutoff: Date, cutoffKnown: boolean): string =>
   cutoffKnown
     ? formatUtcDate(cutoff)
     : `the latest data (${MONTH_ABBR[cutoff.getUTCMonth()]} ${cutoff.getUTCFullYear()})`;
+
+const usdExactFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+/** Whole-dollar USD without compaction, for showing the arithmetic in tooltips. */
+export const formatUsdExact = (value: number): string =>
+  usdExactFormatter.format(value);

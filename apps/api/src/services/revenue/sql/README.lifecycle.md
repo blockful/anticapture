@@ -4,8 +4,8 @@ Dune SQL for the three name-lifecycle series on the ENS revenue page. Revenue, a
 in `README.md`.
 
 **Release.** Create, run and check these three queries as described in `README.md` (Create and schedule on Dune), and
-switch their IDs together with the three revenue queries (step 5 there). The dashboard copy for them is in
-`dashboard-copy-after-query-switch.patch` and ships in the same release (step 6).
+switch their IDs together with the three revenue queries (step 5 there). The dashboard copy for them ships in the
+same release (step 6).
 
 | File                 | Dune query (production)          | API key         | Columns (unchanged)                                                                    |
 | -------------------- | -------------------------------- | --------------- | -------------------------------------------------------------------------------------- |
