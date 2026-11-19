@@ -3,13 +3,16 @@
 import { useMemo } from "react";
 import { useGetRevenueRenewalTenure } from "@anticapture/client/hooks";
 
+import { DeepLinkTitle } from "@/shared/components/deep-link";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
+import { deepLinkTarget } from "@/shared/utils/deepLink";
 
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
+import { REVENUE_ANCHORS } from "@/features/revenue/utils/anchors";
 import { formatCompact } from "@/features/revenue/utils/format";
 import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
 import { transformToRenewalTenure } from "@/features/revenue/utils/transform";
@@ -35,19 +38,24 @@ export const UpcomingExpirationsChart = () => {
     : 11;
 
   return (
-    <Card className="p-4">
-      <div className="flex items-center gap-1.5">
-        <p className="text-secondary text-sm font-medium">
-          Upcoming Expirations
-        </p>
-        <InfoTooltip>
-          {paragraphs(
-            ".eth names grouped by the month their current registration expires, split by how many times they have been renewed since that registration began.",
-            `Headline: names not renewed since their current registration began and not yet expired at the data cutoff, that expire in the 12 calendar months starting with ${cutoffKnown ? "the data cutoff's month" : "the current month"}${series ? ` (${series.next12moPeriod})` : ""}.`,
-            `Names registered before ENSv2 (Oct 27, 2026) use their ENSv2 expiry: ${code("ENSv2 expiry = v1 expiry + 62 days")}`,
-          )}
-        </InfoTooltip>
-      </div>
+    <Card
+      {...deepLinkTarget(REVENUE_ANCHORS.upcomingExpirations)}
+      className="p-4"
+    >
+      <DeepLinkTitle
+        slug={REVENUE_ANCHORS.upcomingExpirations}
+        info={
+          <InfoTooltip>
+            {paragraphs(
+              ".eth names grouped by the month their current registration expires, split by how many times they have been renewed since that registration began.",
+              `Headline: names not renewed since their current registration began and not yet expired at the data cutoff, that expire in the 12 calendar months starting with ${cutoffKnown ? "the data cutoff's month" : "the current month"}${series ? ` (${series.next12moPeriod})` : ""}.`,
+              `Names registered before ENSv2 (Oct 27, 2026) use their ENSv2 expiry: ${code("ENSv2 expiry = v1 expiry + 62 days")}`,
+            )}
+          </InfoTooltip>
+        }
+      >
+        Upcoming Expirations
+      </DeepLinkTitle>
       {!isLoading && (
         <p className="text-secondary mt-0.5 text-sm">
           {series ? (
