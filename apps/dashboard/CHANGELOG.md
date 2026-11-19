@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.19.2
+
+### Patch Changes
+
+- [#2212](https://github.com/blockful/anticapture/pull/2212) [`45ec5bf`](https://github.com/blockful/anticapture/commit/45ec5bf6154e82bb4117c8bedc596a348b4d430f) Thanks [@alextnetto](https://github.com/alextnetto)! - The scrollbars of the votes table, the off-chain results card, the ballot options and the risk description now use the same thumb color as the rest of the app, instead of a darker gray that was hard to see.
+
 ## 2.19.1
 
 ### Patch Changes
