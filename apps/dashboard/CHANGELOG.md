@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.17.6
+
+### Patch Changes
+
+- [#2199](https://github.com/blockful/anticapture/pull/2199) [`16297c8`](https://github.com/blockful/anticapture/commit/16297c8fb28344432dcc55d47face238d574219b) Thanks [@alextnetto](https://github.com/alextnetto)! - Service provider avatars now load through the dashboard's image endpoint instead of straight from raw.githubusercontent.com, so they also appear on networks that cannot reach that host.
+
 ## 2.17.5
 
 ### Patch Changes
