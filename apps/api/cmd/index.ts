@@ -409,6 +409,11 @@ if (env.DAO_ID === DaoIdEnum.ENS) {
       env.REVENUE_DUNE_API_KEY,
       revenueUrls,
     );
+    if (!env.REVENUE_DUNE_ENSV2_DAILY_URL) {
+      logger.warn(
+        "REVENUE_DUNE_ENSV2_DAILY_QUERY_ID is not set; /revenue/ensv2-daily will return empty data",
+      );
+    }
   } else {
     logger.warn(
       "DAO_ID=ENS but REVENUE_DUNE_API_KEY is not set; /revenue/* endpoints will return empty data",

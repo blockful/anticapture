@@ -18,10 +18,17 @@ export const formatMonthLabel = (unixSeconds: number): string => {
   return `${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 };
 
-/** "Oct 27" (UTC). The year is left out: daily axes span months, not years. */
-export const formatDayLabel = (unixSeconds: number): string => {
+/**
+ * "Oct 27" (UTC), or "Oct 27 '26" with the year. Daily axes usually span
+ * months, so the year is added only when the caller says the series needs it.
+ */
+export const formatDayLabel = (
+  unixSeconds: number,
+  withYear = false,
+): string => {
   const d = new Date(unixSeconds * 1000);
-  return `${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCDate()}`;
+  const day = `${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCDate()}`;
+  return withYear ? `${day} '${String(d.getUTCFullYear()).slice(-2)}` : day;
 };
 
 export const formatQuarterLabel = (unixSeconds: number): string => {

@@ -11,6 +11,7 @@ import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { formatCompact, formatUsd } from "@/features/revenue/utils/format";
+import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import {
   ENSV2_REVENUE_BASIS,
   dailyLabelInterval,
@@ -56,10 +57,10 @@ export const Ensv2Section = () => {
         <div className="flex items-center gap-1.5">
           <p className="text-secondary text-sm font-medium">ENSv2</p>
           <InfoTooltip>
-            ENSv2 went live on Oct 27, 2026. Since then every registration and
-            renewal is paid on ENSv2 contracts, in USDC or DAI, and v1 names can
-            migrate to the ENSv2 registry. This section covers that period only,
-            by UTC day; the latest day is partial.
+            {paragraphs(
+              "ENSv2 went live on Oct 27, 2026. Since then every registration and renewal is paid on ENSv2 contracts, in USDC or DAI, and v1 names can migrate to the ENSv2 registry.",
+              "This section covers that period only, by UTC day. The launch day and the latest day are partial.",
+            )}
           </InfoTooltip>
         </div>
         {view && (
@@ -107,10 +108,11 @@ export const Ensv2Section = () => {
                   Daily revenue since ENSv2
                 </p>
                 <InfoTooltip>
-                  {ENSV2_REVENUE_BASIS} Bars are the revenue of each UTC day, by
-                  stream; the line is the running total since the launch (right
-                  axis). The latest bar is a partial day. Dashed lines mark
-                  dated events.
+                  {paragraphs(
+                    ENSV2_REVENUE_BASIS,
+                    `Formula: bars = ${code("revenue of each UTC day, by stream")}; line = ${code("running total since the launch")} (right axis).`,
+                    "The first and the latest bars are partial days. Dashed lines mark dated events.",
+                  )}
                 </InfoTooltip>
               </div>
               <ComboChart
@@ -131,11 +133,12 @@ export const Ensv2Section = () => {
                   Migration to ENSv2
                 </p>
                 <InfoTooltip>
-                  Bars are the v1 names migrated on each UTC day. The line is
-                  the share of v1 names migrated so far (right axis): names
-                  migrated since the launch ÷ v1 names reserved in the ENSv2
-                  registry for migration × 100. The latest bar is a partial day.
-                  Dashed lines mark dated events.
+                  {paragraphs(
+                    "Bars are the v1 names migrated on each UTC day. The line is the share of v1 names migrated so far (right axis).",
+                    `Formula: ${code("names migrated since the launch ÷ reserved v1 names × 100")}`,
+                    "Reserved v1 names are the names the protocol reserved in the ENSv2 registry before the launch. The number is fixed.",
+                    "The first and the latest bars are partial days. Dashed lines mark dated events.",
+                  )}
                 </InfoTooltip>
               </div>
               <ComboChart

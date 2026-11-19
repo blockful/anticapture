@@ -349,18 +349,18 @@
       },
       {
         "day": "2026-11-19 00:00:00.000 UTC",
-        "registration_usd": 1057.97,
+        "registration_usd": 1074.59,
         "premium_usd": 1122.82,
-        "renewal_usd": 4750.87,
-        "total_usd": 6931.66,
-        "cumulative_usd": 218352.12,
-        "registrations": 48,
-        "renewals": 161,
-        "renewals_unmigrated": 150,
-        "names_migrated": 73,
-        "cumulative_migrated": 31308,
+        "renewal_usd": 4752.97,
+        "total_usd": 6950.38,
+        "cumulative_usd": 218370.84,
+        "registrations": 51,
+        "renewals": 162,
+        "renewals_unmigrated": 151,
+        "names_migrated": 75,
+        "cumulative_migrated": 31310,
         "reserved_names": 919728,
-        "migrated_pct": 3.404
+        "migrated_pct": 3.4043
       }
     ]
   }

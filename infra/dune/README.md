@@ -18,7 +18,7 @@ Every Dune query the Anticapture API reads lives in one Dune team and is read wi
 | ENS active names                    | 9152947 | Daily, 16:30–17:00   | 2               | `ens-api`     | `REVENUE_DUNE_ACTIVE_NAMES_QUERY_ID`           | `apps/api/src/services/revenue/sql/active_names.sql`   |
 | ENS renewal funnel                  | 9152948 | Daily, 16:30–17:00   | 1               | `ens-api`     | `REVENUE_DUNE_RENEWAL_FUNNEL_QUERY_ID`         | `apps/api/src/services/revenue/sql/renewal_funnel.sql` |
 | ENS upcoming expirations            | 9152949 | Daily, 16:30–17:00   | < 1             | `ens-api`     | `REVENUE_DUNE_RENEWAL_TENURE_QUERY_ID`         | `apps/api/src/services/revenue/sql/renewal_tenure.sql` |
-| ENSv2 daily (revenue and migration) | 9155159 | Daily                | 1               | `ens-api`     | `REVENUE_DUNE_ENSV2_DAILY_QUERY_ID` (optional) | `apps/api/src/services/revenue/sql/ensv2_daily.sql`    |
+| ENSv2 daily (revenue and migration) | 9155159 | Daily, 16:30–17:00   | 1 to 3          | `ens-api`     | `REVENUE_DUNE_ENSV2_DAILY_QUERY_ID` (optional) | `apps/api/src/services/revenue/sql/ensv2_daily.sql`    |
 | ENS revenue by category             | 9154590 | Daily, 21:30–22:00   | < 1             | `ens-api`     | `REVENUE_DUNE_REVENUE_BY_CATEGORY_QUERY_ID`    | `infra/dune/ens_revenue_by_category.sql`               |
 | Shutter liquid treasury             | 9154598 | Mondays, 21:30–22:00 | 78              | `shutter-api` | `TREASURY_DATA_PROVIDER_API_URL`               | `infra/dune/shutter_liquid_treasury.sql`               |
 

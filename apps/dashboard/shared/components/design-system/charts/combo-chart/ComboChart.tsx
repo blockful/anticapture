@@ -48,8 +48,11 @@ export const ComboChart = ({
       ? (value: string) => value.split(" ")[1] ?? value
       : undefined);
 
-  const drawnMarkers = (markers ?? []).filter((marker) =>
-    xAxisLabels.includes(marker.xLabel),
+  const drawnMarkers = (markers ?? []).filter(
+    (marker) =>
+      Number.isInteger(marker.index) &&
+      marker.index >= 0 &&
+      marker.index < xAxisLabels.length,
   );
   const markLine =
     drawnMarkers.length > 0
@@ -72,10 +75,11 @@ export const ComboChart = ({
             // ends at it in the right half, so it never runs off either edge.
             data: drawnMarkers.map((marker) => ({
               name: marker.label,
-              xAxis: marker.xLabel,
+              // The category's position: a label can repeat on the axis.
+              xAxis: marker.index,
               label: {
                 align:
-                  xAxisLabels.indexOf(marker.xLabel) < xAxisLabels.length / 2
+                  marker.index < xAxisLabels.length / 2
                     ? ("left" as const)
                     : ("right" as const),
               },

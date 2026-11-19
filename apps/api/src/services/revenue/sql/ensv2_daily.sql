@@ -1,5 +1,5 @@
 -- ENSv2 daily series: revenue and v1 -> ENSv2 migration progress, one row per UTC day since the ENSv2 launch
--- (block 26,282,117, 2026-10-27 06:01:59 UTC). The current day is partial.
+-- (block 26,282,117, 2026-10-27 06:01:59 UTC), through today. The launch day and the current day are partial.
 --
 -- Revenue (cash basis, what the protocol kept, USDC 6 dec / DAI 18 dec at $1), same events as revenue_totals.sql:
 --   ETHRegistrar 0xD6D8...CC81  NameRegistered  -> registration_usd (base) + premium_usd (premium)
@@ -8,8 +8,8 @@
 --   Any other payment token fails the query instead of being dropped.
 --
 -- Migration (ETHRegistry 0xf60A...85e2, the ENSv2 .eth registry):
---   reserved_names  = distinct labels the BatchRegistrar reserved for v1 names before and at the launch
---                     (LabelReserved). This is the set of v1 names that can migrate. It is fixed after the launch.
+--   reserved_names  = distinct labels the BatchRegistrar 0xf0Cc...9721 reserved for v1 names before and at the
+--                     launch (LabelReserved). This is the set of v1 names that can migrate. It is fixed.
 --   names_migrated  = LabelRegistered sent by the UnlockedMigrationController 0xab82...eb64 or the
 --                     LockedMigrationController 0x3cea...e51a on that day (one per name).
 --   migrated_pct    = cumulative_migrated / reserved_names * 100.
@@ -61,6 +61,9 @@ pay_priced AS (
     END AS unit,
     base_raw, premium_raw, renewal_raw
   FROM pay_decoded
+  -- Paid events only, as in revenue_totals.sql and actions.sql. A zero-amount event is not a payment, and its token
+  -- word is not priced (so an unset token on such an event cannot fail the query).
+  WHERE base_raw + premium_raw + renewal_raw > 0
 ),
 
 pay_daily AS (
@@ -83,10 +86,14 @@ registry_logs AS (
                    0x2fe093918572373e9f1f0368f414dffd0043a74ae8c9fd7b0e390b26a0d20b6e)  -- LabelRegistered
 ),
 
+-- Only the BatchRegistrar's reservations: the pre-migration sync of v1 names, which ended on the launch day
+-- (block 26,282,548). A LabelReserved from any other sender is not a v1 name waiting to migrate, so the denominator
+-- stays fixed.
 reserved AS (
   SELECT count(DISTINCT label_hash) AS reserved_names
   FROM registry_logs
   WHERE topic0 = 0x734822851860327a80c624af1471efac6bb0ac641852fc6c7bfeeee3202ae6a8
+    AND sender = 0xf0ccfbf6dba1e01ccb833ced6d551a8f000e9721 -- BatchRegistrar
 ),
 
 -- One row per migrated name, at its first migration event.
@@ -113,11 +120,10 @@ registered_daily AS (
   GROUP BY 1
 ),
 
+-- Through today, whether or not anything happened: a day with no event is a row of zeros, not a missing row.
 days AS (
   SELECT CAST(d AS timestamp(3) with time zone) AS day
-  FROM unnest(sequence(DATE '2026-10-27',
-                       CAST(date_trunc('day', (SELECT max(block_time) FROM pay_logs)) AS date),
-                       INTERVAL '1' DAY)) AS t(d)
+  FROM unnest(sequence(DATE '2026-10-27', current_date, INTERVAL '1' DAY)) AS t(d)
 ),
 
 joined AS (

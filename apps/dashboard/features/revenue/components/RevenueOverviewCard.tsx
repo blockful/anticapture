@@ -11,17 +11,28 @@ import { ProgressBar } from "@/shared/components/design-system/progress-bar/Prog
 import { cn } from "@/shared/utils/cn";
 
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { transformToOverview } from "@/features/revenue/utils/transform";
 
+const SHARE_FORMULA = code("share = stream revenue ÷ total revenue × 100");
+
+/** Definition, then the formulas of the share and of the average. */
 const STREAM_DESCRIPTIONS: Record<string, string> = {
-  Registration:
-    "Base fees paid for new .eth registrations, including the base price of registrations that also paid a premium. Volume counts registrations that paid no premium; the average is this revenue ÷ every registration, with or without a premium.",
-  Renewals:
-    "Fees paid to extend existing .eth registrations. Volume counts paid renewals; the average is this revenue ÷ that count.",
-  Premium:
-    "The temporary, decaying surcharge for registering a recently released name. For the 2020 controller, which charged one combined price, the premium is that price minus the base rent at the oracle's ETH/USD rate. Volume counts registrations that paid one; the average is this revenue ÷ that count.",
+  Registration: paragraphs(
+    "Base fees paid for new .eth registrations, including the base price of registrations that also paid a premium. Volume counts registrations that paid no premium.",
+    `Formulas: ${SHARE_FORMULA} and ${code("average = stream revenue ÷ every registration")}, with or without a premium.`,
+  ),
+  Renewals: paragraphs(
+    "Fees paid to extend existing .eth registrations. Volume counts paid renewals.",
+    `Formulas: ${SHARE_FORMULA} and ${code("average = stream revenue ÷ paid renewals")}`,
+  ),
+  Premium: paragraphs(
+    "The temporary, decaying surcharge for registering a recently released name. Volume counts registrations that paid one.",
+    `Formulas: ${SHARE_FORMULA} and ${code("average = stream revenue ÷ registrations with a premium")}`,
+    "For the 2020 controller, which charged one combined price, the premium is that price minus the base rent at the oracle's ETH/USD rate.",
+  ),
 };
 
 export const RevenueOverviewCard = () => {
@@ -94,9 +105,10 @@ export const RevenueOverviewCard = () => {
                       {stream.name}
                     </span>
                     <InfoTooltip>
-                      {STREAM_DESCRIPTIONS[stream.name]} All time:{" "}
-                      {overview.period}. Share = this stream ÷ total protocol
-                      revenue.
+                      {paragraphs(
+                        STREAM_DESCRIPTIONS[stream.name],
+                        `Window: all time, ${overview.period}.`,
+                      )}
                     </InfoTooltip>
                   </div>
                   <span

@@ -867,6 +867,65 @@ describe("Revenue Controller", () => {
     });
   });
 
+  describe("ENSv2 daily without its query ID", () => {
+    it("answers empty, degraded and uncached, and leaves the other routes alone", async () => {
+      let ensv2Hits = 0;
+      server.use(
+        http.get(urls.ensv2Daily, () => {
+          ensv2Hits += 1;
+          return HttpResponse.json(ensv2DailyFixture);
+        }),
+        http.get(urls.revenueTotals, () =>
+          HttpResponse.json(revenueTotalsFixture),
+        ),
+      );
+      const { ensv2Daily: _unset, ...required } = urls;
+      const app = createTestApp(new RevenueDuneClient(API_KEY, required));
+
+      const res = await app.request("/revenue/ensv2-daily");
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("cache-control")).toBe("no-store");
+      expect(ensv2Hits).toBe(0);
+
+      const totals = await app.request("/revenue/totals");
+      expect(totals.status).toBe(200);
+      expect(((await totals.json()) as RevenueBody).meta).toEqual(HEALTHY_META);
+    });
+
+    it("sorts by day in both directions and filters by range", async () => {
+      server.use(
+        http.get(urls.ensv2Daily, () => HttpResponse.json(ensv2DailyFixture)),
+      );
+      const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+      const launch = Date.UTC(2026, 9, 27) / 1000;
+
+      const asc = (await (
+        await app.request("/revenue/ensv2-daily")
+      ).json()) as RevenueBody;
+      expect(asc.items[0]?.date).toBe(launch);
+      expect(asc.items.map((i) => i.date)).toEqual(
+        [...asc.items.map((i) => i.date)].sort((a, b) => a - b),
+      );
+
+      const desc = (await (
+        await app.request("/revenue/ensv2-daily?orderDirection=desc")
+      ).json()) as RevenueBody;
+      expect(desc.items[desc.items.length - 1]?.date).toBe(launch);
+
+      const ranged = (await (
+        await app.request(
+          `/revenue/ensv2-daily?fromDate=${launch + 86_400}&toDate=${launch + 2 * 86_400}`,
+        )
+      ).json()) as RevenueBody;
+      expect(ranged.items.map((i) => i.date)).toEqual([
+        launch + 86_400,
+        launch + 2 * 86_400,
+      ]);
+      expect(ranged.totalCount).toBe(2);
+    });
+  });
+
   describe("Revenue API surface (US-011)", () => {
     it("returns 200 with the expected shape for every endpoint", async () => {
       for (const endpoint of REVENUE_ENDPOINTS) {

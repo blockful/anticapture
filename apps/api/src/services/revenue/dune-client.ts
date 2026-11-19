@@ -459,7 +459,7 @@ export class RevenueDuneClient {
   public async fetchEnsv2Daily(): Promise<
     RevenueSeries<RevenueEnsv2DailyItem>
   > {
-    if (!this.urls.ensv2Daily) {
+    if (this.urls.ensv2Daily === undefined) {
       return { items: [], meta: { asOf: null, degraded: true } };
     }
     const { rows, meta } = await this.fetchJson(
@@ -538,10 +538,10 @@ export class RevenueDuneClient {
     const url = this.urls[key];
     // Only an optional query can lack a URL, and its fetcher answers before
     // getting here. This keeps the type honest without a cast.
-    if (!url) return emptyRows();
+    if (url === undefined) return emptyRows();
     // An outage with nothing stale to serve must not be re-probed by every
-    // request: seven revenue queries at the 15 s provider deadline would hang
-    // one page for close to two minutes. The empty answer is leased for the
+    // request: eight revenue queries at the 15 s provider deadline would hang
+    // one page for two minutes. The empty answer is leased for the
     // same short window a stale one is. Leased answers are not counted again
     // on degraded_upstream_responses_total: inside the window the counter
     // counts probes, not responses, which is enough for the alert to fire.

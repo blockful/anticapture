@@ -5,7 +5,7 @@ import type { RevenueEnsv2DailyItem } from "@anticapture/client";
  * 9155159 as executed on 2026-11-19. `LIVE_ENSV2_AS_OF` is its
  * execution_ended_at, so the latest day (Nov 19) is partial.
  */
-export const LIVE_ENSV2_AS_OF = "2026-11-19T15:28:04Z";
+export const LIVE_ENSV2_AS_OF = "2026-11-19T15:50:49Z";
 
 export const liveEnsv2Daily: RevenueEnsv2DailyItem[] = [
   {
@@ -355,17 +355,17 @@ export const liveEnsv2Daily: RevenueEnsv2DailyItem[] = [
   },
   {
     date: 1795046400,
-    registrationUsd: 1057.97,
+    registrationUsd: 1074.59,
     premiumUsd: 1122.82,
-    renewalUsd: 4750.87,
-    totalUsd: 6931.66,
-    cumulativeUsd: 218352.12,
-    registrations: 48,
-    renewals: 161,
-    renewalsUnmigrated: 150,
-    namesMigrated: 73,
-    cumulativeMigrated: 31308,
+    renewalUsd: 4752.97,
+    totalUsd: 6950.38,
+    cumulativeUsd: 218370.84,
+    registrations: 51,
+    renewals: 162,
+    renewalsUnmigrated: 151,
+    namesMigrated: 75,
+    cumulativeMigrated: 31310,
     reservedNames: 919728,
-    migratedPct: 3.404,
+    migratedPct: 3.4043,
   },
 ];

@@ -42,8 +42,11 @@ export type ComboChartLineSeries = {
 
 /** A dated event drawn as a vertical dashed line at one x-axis category. */
 export type ComboChartMarker = {
-  /** Must equal one of `xAxisLabels`; a marker with no matching label is not drawn. */
-  xLabel: string;
+  /**
+   * Position of the category in `xAxisLabels`. By position, not by label:
+   * two categories can print the same label. Out of range is not drawn.
+   */
+  index: number;
   label: string;
 };
 

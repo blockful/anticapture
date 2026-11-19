@@ -27,6 +27,7 @@ import {
   presentDelta,
   sumBy,
 } from "@/features/revenue/utils/window";
+import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 
 /** One API series feeding a KPI, with the instant its data runs up to. */
 export type KpiSeries<T> = {
@@ -41,12 +42,19 @@ export type KpiSeries<T> = {
 };
 
 export const KPI_DESCRIPTIONS = {
-  newWallets:
-    "New registrants: each address is counted once, in the month it first becomes the owner of a newly registered .eth name (first paid registration on the v1 ETH registrar controllers, from May 2019, or on ENSv2). Renewals do not add wallets. Formula: sum of the monthly new registrants in the window.",
-  renewalRate:
-    "Share of .eth registration terms expiring in the window that were renewed before the end of their grace period (90 days after expiry; 28 days for names registered on ENSv2), weighted by the number of terms. Each registration or renewal is one term, grouped by the month it expires. Names registered before ENSv2 use their v1 expiry here (their ENSv2 expiry minus 62 days). A renewal that leaves the name still expired (a grace-period top-up) is not a term. Formula: renewed terms ÷ expiring terms × 100, both summed over the window.",
-  revenue:
-    "Protocol revenue from .eth registrations, renewals and premiums, counted when paid, on the v1 ETH registrar controllers and on ENSv2. ETH is converted to USD at the hourly ETH price; USDC and DAI at face value. Formula: sum of the monthly revenue in the window.",
+  newWallets: paragraphs(
+    "New registrants: each address is counted once, in the month it first becomes the owner of a newly registered .eth name (first paid registration on the v1 ETH registrar controllers, from May 2019, or on ENSv2). Renewals do not add wallets.",
+    `Formula: ${code("sum of monthly new registrants in the window")}`,
+  ),
+  renewalRate: paragraphs(
+    "Share of .eth registration terms expiring in the window that were renewed before the end of their grace period (90 days after expiry; 28 days for names registered on ENSv2), weighted by the number of terms.",
+    `Formula: ${code("renewed terms ÷ expiring terms × 100")}, both summed over the window.`,
+    "Each registration or renewal is one term, grouped by the month it expires. Names registered before ENSv2 use their v1 expiry here (their ENSv2 expiry minus 62 days). A renewal that leaves the name still expired (a grace-period top-up) is not a term.",
+  ),
+  revenue: paragraphs(
+    "Protocol revenue from .eth registrations, renewals and premiums, counted when paid, on the v1 ETH registrar controllers and on ENSv2. ETH is converted to USD at the hourly ETH price; USDC and DAI at face value.",
+    `Formula: ${code("sum of monthly revenue in the window")}`,
+  ),
 } as const;
 
 const formatWindow = (window: CalendarWindow): string =>
@@ -98,7 +106,7 @@ function buildFlowKpi<T extends { date: number }>(args: {
       value:
         current.length > 0 ? args.formatValue(args.aggregate(current)) : "—",
       subtext: sinceLabel,
-      tooltip: `${args.description} Window: all data, ${period}.`,
+      tooltip: paragraphs(args.description, `Window: all data, ${period}.`),
     };
   }
 
@@ -137,8 +145,8 @@ function buildFlowKpi<T extends { date: number }>(args: {
     previousValue !== null
       ? `, compared with ${formatWindow(windows.previous)}. ${
           args.deltaKind === "pct"
-            ? "Change = (window ÷ previous window − 1) × 100."
-            : "Change = window rate − previous window rate, in percentage points."
+            ? `Change = ${code("(window ÷ previous window − 1) × 100")}`
+            : `Change = ${code("window rate − previous window rate")}, in percentage points.`
         }`
       : ". The data does not cover an earlier window to compare with.";
 
@@ -146,7 +154,7 @@ function buildFlowKpi<T extends { date: number }>(args: {
     title: args.title,
     value: current.length > 0 ? args.formatValue(currentValue) : "—",
     subtext: sinceLabel,
-    tooltip: `${args.description} ${windowText}${comparisonText}`,
+    tooltip: paragraphs(args.description, `${windowText}${comparisonText}`),
     delta: presentation
       ? {
           value: presentation.text,
