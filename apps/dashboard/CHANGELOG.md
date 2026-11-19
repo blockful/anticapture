@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.18.1
+
+### Patch Changes
+
+- [#2202](https://github.com/blockful/anticapture/pull/2202) [`238a2e3`](https://github.com/blockful/anticapture/commit/238a2e32807982b96cb3065c413a405d6ecfa007) Thanks [@alextnetto](https://github.com/alextnetto)! - Scrollbars now match the app: a dimmed thumb on a transparent track, instead of the browser's light scrollbar with a white track on the dark interface.
+
 ## 2.18.0
 
 ### Minor Changes
