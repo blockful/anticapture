@@ -9,7 +9,7 @@ envsubst < /etc/prometheus/prometheus.yml.tmpl > /etc/prometheus/prometheus.yml
 # counters appear to reset constantly and rate()/increase() report thousands of
 # times the real traffic. The API job therefore resolves the hostname's AAAA
 # records (one per replica) and scrapes each replica as its own target.
-DAOS="${DAOS:-ens aave shutter scroll nouns gitcoin compound uniswap obol}"
+DAOS="${DAOS:-ens aave shutter nouns gitcoin compound uniswap obol}"
 for dao in $DAOS; do
   DAO=$(echo "$dao" | tr '[:lower:]-' '[:upper:]_')
   eval indexer=\"\$${DAO}_INDEXER_ENDPOINT\"
