@@ -146,8 +146,7 @@ month for some addresses.
 **Not covered:** names created outside the controllers (the 2019 auction, claims, legacy migrations) count from
 their first controller registration, if any.
 
-**Dashboard copy must change with the query.** The dashboard copy in this branch describes the queries that are
-live today. `dashboard-copy-after-query-switch.patch` (next to this README) holds the copy for these new queries:
+**Dashboard copy changes with the query.** The dashboard copy now describes these new queries:
 revenue basis (ENSv2, hourly ETH price), the c3 premium split in the stream tooltips, the owner-based new wallets
 (KPI, chart title and caption, OpenAPI description), the renewal-rate grace periods (28 days on ENSv2) and the
 micro-renewal exclusion, the ENSv2 expiry for v1-origin names, and the ETH-only meaning of the ETH columns. Apply it
@@ -187,7 +186,8 @@ text.
    `REVENUE_DUNE_RENEWAL_TENURE_QUERY_ID` to the new lifecycle queries, created, run and checked against the
    acceptance values in `README.lifecycle.md` the same way. Switch all six together: the copy patch in step 6
    describes all six. The API reads `GET /query/{id}/results`.
-6. **Ship the copy.** Apply `dashboard-copy-after-query-switch.patch` and deploy the dashboard and API with it.
+6. **Ship the copy.** The dashboard and API copy for these queries is applied in the same change as this note;
+   deploy it together with the ID switch.
 
 `fail(varchar)` is Trino's built-in hidden scalar function (`io.trino.operator.scalar.FailureFunction`). If Dune ever
 rejects it, replace each call with a cast that errors on the same branch, e.g.

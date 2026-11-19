@@ -42,9 +42,11 @@ export const UpcomingExpirationsChart = () => {
         <InfoTooltip>
           .eth names grouped by the month their current registration expires,
           split by how many times they have been renewed since that registration
-          began. The headline counts names not renewed since their current
-          registration began and not yet expired at the data cutoff that expire
-          in the 12 calendar months starting with{" "}
+          began. Names registered before ENSv2 (Oct 27, 2026) use their ENSv2
+          expiry, which is their v1 expiry plus 62 days. The headline counts
+          names not renewed since their current registration began and not yet
+          expired at the data cutoff that expire in the 12 calendar months
+          starting with{" "}
           {cutoffKnown ? "the data cutoff's month" : "the current month"}
           {series ? ` (${series.next12moPeriod})` : ""}.
         </InfoTooltip>

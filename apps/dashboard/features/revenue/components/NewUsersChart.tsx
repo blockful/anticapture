@@ -25,14 +25,14 @@ export const NewUsersChart = () => {
     <Card className="p-4">
       <div className="mb-3 flex items-center gap-1.5">
         <p className="text-secondary text-sm font-medium">
-          New Wallets Interacting with ENS
+          New .eth Registrants
         </p>
         <InfoTooltip>
-          First-time wallets: each wallet is counted once, in the month it first
-          sent a registration or renewal transaction to a .eth registrar
-          controller (May 2019 onward). The wallet is the transaction sender,
-          not necessarily the name owner. The cumulative line counts every
-          wallet seen so far.
+          New registrants: each address is counted once, in the month it first
+          becomes the owner of a newly registered .eth name (first paid
+          registration on the v1 ETH registrar controllers, from May 2019, or on
+          ENSv2). Renewals do not add wallets. The cumulative line counts every
+          registrant seen so far.
         </InfoTooltip>
       </div>
       {isLoading ? (

@@ -17,11 +17,11 @@ import { transformToOverview } from "@/features/revenue/utils/transform";
 
 const STREAM_DESCRIPTIONS: Record<string, string> = {
   Registration:
-    "Fees paid for new .eth registrations. Includes any premium a registrar contract did not record separately. Volume counts registrations without a separately recorded premium; the average divides by every registration, including those that also paid a premium.",
+    "Base fees paid for new .eth registrations, including the base price of registrations that also paid a premium. Volume counts registrations that paid no premium; the average is this revenue ÷ every registration, with or without a premium.",
   Renewals:
-    "Fees paid to extend existing .eth registrations. Volume counts renewal events.",
+    "Fees paid to extend existing .eth registrations. Volume counts paid renewals; the average is this revenue ÷ that count.",
   Premium:
-    "Premium counts premiums recorded separately by the registrar contracts: the temporary, decaying surcharge for registering a recently released name. Volume counts registrations that paid one.",
+    "The temporary, decaying surcharge for registering a recently released name. For the 2020 controller, which charged one combined price, the premium is that price minus the base rent at the oracle's ETH/USD rate. Volume counts registrations that paid one; the average is this revenue ÷ that count.",
 };
 
 export const RevenueOverviewCard = () => {
@@ -95,7 +95,8 @@ export const RevenueOverviewCard = () => {
                     </span>
                     <InfoTooltip>
                       {STREAM_DESCRIPTIONS[stream.name]} All time:{" "}
-                      {overview.period}. Share is of total protocol revenue.
+                      {overview.period}. Share = this stream ÷ total protocol
+                      revenue.
                     </InfoTooltip>
                   </div>
                   <span

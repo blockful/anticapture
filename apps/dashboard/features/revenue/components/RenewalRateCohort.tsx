@@ -33,14 +33,18 @@ export const RenewalRateCohort = () => {
         </p>
         <InfoTooltip>
           Share of .eth registration terms expiring in each year that were
-          renewed before the end of their grace period (expiry + 90 days). Each
-          registration or renewal is one term, so a name renewed several times
-          counts several times. Only terms whose grace period has ended are
-          included
+          renewed before the end of their grace period (90 days after expiry; 28
+          days for names registered on ENSv2). Each registration or renewal is
+          one term, so a name renewed several times counts several times; a
+          renewal that leaves the name still expired (a grace-period top-up) is
+          not a term. Names registered before ENSv2 are grouped by their v1
+          expiry (their ENSv2 expiry minus 62 days). Only terms whose grace
+          period has ended are included
           {meta.asOf
             ? ` (expiring before ${formatUtcDate(toRenewalCohortCutoff(meta.asOf))}, 90 days before the data cutoff)`
             : ""}
-          , so the latest year is partial.
+          , so the latest year is partial. Formula: renewed terms ÷ expiring
+          terms × 100, per expiry year.
         </InfoTooltip>
       </div>
       <p className="text-secondary mt-0.5 text-sm">

@@ -114,10 +114,14 @@ export const RevenueNewWalletsItemSchema = z
       .describe("Month start (Unix timestamp in seconds, UTC)."),
     newWallets: z
       .number()
-      .describe("New wallets that interacted with ENS in the given month."),
+      .describe(
+        "Addresses that first became the registrant (owner) of a .eth name in the given month, at their first paid registration on the v1 ETH registrar controllers (from May 2019) or on ENSv2. Renewals do not add wallets.",
+      ),
     cumulativeWallets: z
       .number()
-      .describe("Cumulative count of ENS wallets as of the given month."),
+      .describe(
+        "Cumulative count of distinct .eth registrants as of the given month.",
+      ),
   })
   .openapi("RevenueNewWalletsItem", {
     description: "Single new-wallets datapoint.",
@@ -131,7 +135,7 @@ export const RevenueNewWalletsResponseSchema = z
   })
   .openapi("RevenueNewWalletsResponse", {
     description:
-      "Monthly new-wallet counts and the cumulative wallet total for ENS.",
+      "Monthly new-registrant counts and the cumulative registrant total for ENS.",
   });
 
 export type RevenueNewWalletsResponse = z.infer<
@@ -190,7 +194,7 @@ export const RevenueTotalsItemSchema = z
     premiumUsd: z
       .number()
       .describe(
-        "USD revenue from temporary premium auctions in the given month, as recorded separately by the 2023 and later controllers; premiums paid through the 2020 controller are included in registrationUsd.",
+        "USD revenue from temporary premium auctions in the given month.",
       ),
     renewalUsd: z
       .number()
@@ -202,15 +206,19 @@ export const RevenueTotalsItemSchema = z
       ),
     registrationEth: z
       .number()
-      .describe("ETH revenue from new .eth registrations in the month."),
+      .describe(
+        "ETH paid for new .eth registrations in the month. ENSv2 payments are in USDC or DAI and appear only in the USD fields.",
+      ),
     premiumEth: z
       .number()
       .describe(
-        "ETH revenue from temporary premium auctions in the given month, as recorded separately by the 2023 and later controllers; premiums paid through the 2020 controller are included in registrationEth.",
+        "ETH paid in temporary premium auctions in the given month. ENSv2 payments are in USDC or DAI and appear only in the USD fields.",
       ),
     renewalEth: z
       .number()
-      .describe("ETH revenue from .eth renewals in the given month."),
+      .describe(
+        "ETH paid for .eth renewals in the given month. ENSv2 payments are in USDC or DAI and appear only in the USD fields.",
+      ),
   })
   .openapi("RevenueTotalsItem", {
     description: "Single revenue-totals datapoint.",
@@ -224,7 +232,7 @@ export const RevenueTotalsResponseSchema = z
   })
   .openapi("RevenueTotalsResponse", {
     description:
-      "Monthly ENS revenue totals split into registration, premium, and renewal, in both USD and ETH.",
+      "Monthly ENS revenue totals split into registration, premium, and renewal: USD covers every payment, ETH covers payments made in ETH.",
   });
 
 export type RevenueTotalsResponse = z.infer<typeof RevenueTotalsResponseSchema>;

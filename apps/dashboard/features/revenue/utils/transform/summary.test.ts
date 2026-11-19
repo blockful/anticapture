@@ -258,6 +258,26 @@ describe("computeRevenueSummary on synthetic months", () => {
     expect(summary.qoqDelta).toBeUndefined();
   });
 
+  it("spells out the arithmetic behind the run rate and its delta", () => {
+    const items = [
+      month(2026, 1, 300),
+      month(2026, 2, 300),
+      month(2026, 3, 300),
+      month(2026, 4, 9200),
+      month(2026, 5, 9200),
+      month(2026, 6, 9200),
+    ];
+    const summary = computeRevenueSummary(
+      items,
+      "max",
+      new Date("2026-08-10T00:00:00Z"),
+    );
+
+    // May to Jul 2026 is 92 days; Feb to Apr 2026 is 89 days.
+    expect(summary.runRateFormula).toBe("$27,600 ÷ 92 days × 365 = $109,500");
+    expect(summary.qoqDelta?.formula).toBe("($300 ÷ $10 − 1) × 100");
+  });
+
   it("returns zeros for an empty series (cards show Unavailable instead)", () => {
     expect(computeRevenueSummary([], "max", cutoff)).toMatchObject({
       actualUsd: 0,

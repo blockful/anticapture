@@ -9,6 +9,7 @@ import {
   formatMonthLabel,
   formatMonthRange,
   formatUsd,
+  formatUsdExact,
 } from "@/features/revenue/utils/format";
 import {
   type CalendarWindow,
@@ -121,6 +122,10 @@ const presentRunRateDelta = (runRate: RunRate): RevenueSummary["qoqDelta"] => {
     text: `${presented.text}% vs prior 3 months`,
     trend: presented.trend,
     previousPeriod: formatWindow(runRate.previousWindow),
+    formula:
+      runRate.previousAverageDailyUsd === null
+        ? ""
+        : `(${formatUsdExact(runRate.averageDailyUsd)} ÷ ${formatUsdExact(runRate.previousAverageDailyUsd)} − 1) × 100`,
   };
 };
 
@@ -140,6 +145,7 @@ export const computeRevenueSummary = (
     runRateUsd: runRate.annualizedUsd,
     runRate: formatUsd(runRate.annualizedUsd),
     runRatePeriod: formatWindow(runRate.window),
+    runRateFormula: `${formatUsdExact(runRate.averageDailyUsd * runRate.window.days)} ÷ ${runRate.window.days} days × ${DAYS_PER_YEAR} = ${formatUsdExact(runRate.annualizedUsd)}`,
     qoqDelta: presentRunRateDelta(runRate),
   };
 };

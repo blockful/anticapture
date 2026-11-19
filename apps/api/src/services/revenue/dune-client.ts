@@ -35,7 +35,7 @@ const duneExecutionEndedAt = z.iso
 /**
  * Envelope every Dune result endpoint shares, wrapped around the row schema of
  * the query being fetched. Validating the columns here, before anything is
- * cached, is what keeps a renamed or nulled column from being stored for 24h
+ * cached, is what keeps a renamed or nulled column from being stored for the cache TTL
  * and then failing in the mappers on every later request.
  */
 const duneEnvelopeSchema = <Row>(rowSchema: z.ZodType<Row>) =>
@@ -60,7 +60,7 @@ const revenueRowsSchema = <Row>(rowSchema: z.ZodType<Row>) =>
 
 /**
  * Month columns are parsed by `parseDuneMonth`, so validate the exact format it
- * accepts. A format change would otherwise pass validation, be cached for 24h,
+ * accepts. A format change would otherwise pass validation, be cached for the TTL,
  * and throw in the mapper on every later request.
  */
 const duneMonth = z
@@ -407,7 +407,7 @@ export class RevenueDuneClient {
   }
 
   /**
-   * Fetches a Dune result set, caching it for 24h. When Dune is unhealthy the
+   * Fetches a Dune result set, caching it for REVENUE_CACHE_TTL_MS (6h). When Dune is unhealthy the
    * last known result is served stale, or an empty result set when there is
    * none, and the answer's meta says so. Revenue is third-party data: an
    * outage there must never surface as a 5xx, because the gateway counts 5xx

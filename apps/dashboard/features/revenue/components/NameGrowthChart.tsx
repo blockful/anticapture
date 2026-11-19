@@ -51,11 +51,17 @@ export const NameGrowthChart = () => {
           point in the month: a name leaves the count in the month after it
           expires, so the headline counts names active at some point{" "}
           {latestMonthText}, including names that expired during it. Renewing or
-          re-registering within 90 days of expiry continues the same
-          registration. Bars show the net monthly change: names that became
-          active minus names that expired the month before. Names count from
-          their first registrar-controller event (May 2019 onward), so names
-          from the 2017 auction appear once renewed through a controller.
+          re-registering within the grace period continues the same
+          registration: 28 days after the ENSv2 expiry, which for names
+          registered before ENSv2 (Oct 27, 2026) is 90 days after their v1
+          expiry. Names registered before ENSv2 that had not expired by Sep 1,
+          2026 count until their ENSv2 expiry (v1 expiry plus 62 days). Bars
+          show the net monthly change: names that became active minus names that
+          expired the month before. Names count from their first
+          registrar-controller event (May 2019 onward), so names from the 2017
+          auction appear once renewed through a controller. Formula: each
+          registration adds 1 in the month it starts and subtracts 1 in the
+          month after it expires; the line is the running total.
         </InfoTooltip>
       </div>
       {!isLoading && (

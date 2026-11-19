@@ -497,7 +497,7 @@ describe("RevenueDuneClient", () => {
     expect(hits).toBe(1);
   });
 
-  it("re-fetches after the 24h TTL expires", async () => {
+  it("re-fetches after the cache TTL expires", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-01-01T00:00:00Z"));
 
