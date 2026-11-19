@@ -405,6 +405,62 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/*
+  Deep links (shared/utils/deepLink.ts). The block a shared link points at
+  pulses its border twice when the page arrives at it. The outline sits on
+  the border, so it reads the same on a card and on a cell inside a card.
+*/
+[data-deep-link] {
+  /* Used when a tall block is scrolled to its top: clears the fixed mobile header. */
+  scroll-margin-top: 7.75rem;
+}
+
+@media (min-width: 1024px) {
+  [data-deep-link] {
+    scroll-margin-top: 1rem;
+  }
+}
+
+[data-deep-link-pulse] {
+  outline: 1px solid transparent;
+  outline-offset: -1px;
+  animation: deep-link-pulse 1.8s ease-in-out 1;
+}
+
+@keyframes deep-link-pulse {
+  0%,
+  100% {
+    outline-color: transparent;
+    box-shadow: 0 0 0 0 transparent;
+  }
+  18%,
+  68% {
+    outline-color: var(--color-link);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-link) 26%, transparent);
+  }
+  44% {
+    outline-color: color-mix(in srgb, var(--color-link) 40%, transparent);
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+/* No motion: the border is held, then released. */
+@keyframes deep-link-hold {
+  0%,
+  85% {
+    outline-color: var(--color-link);
+  }
+  100% {
+    outline-color: transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-deep-link-pulse] {
+    animation: deep-link-hold 1.8s linear 1;
+  }
+}
+
 /* 
   @DEV: TODO: Check these styles once the new design system is fully implemented.
   - Check the font sizes and line heights when create the Text component.

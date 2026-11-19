@@ -3,13 +3,16 @@
 import { useMemo, useState } from "react";
 import { useGetRevenueTotals } from "@anticapture/client/hooks";
 
+import { DeepLinkTitle } from "@/shared/components/deep-link";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
+import { deepLinkTarget } from "@/shared/utils/deepLink";
 
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
+import { REVENUE_ANCHORS } from "@/features/revenue/utils/anchors";
 import { REVENUE_BASIS } from "@/features/revenue/utils/copy";
 import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import type { ChartGranularity } from "@/features/revenue/types";
@@ -56,21 +59,23 @@ export const MonthlyRevenueChart = () => {
   );
 
   return (
-    <Card className="p-4">
+    <Card {...deepLinkTarget(REVENUE_ANCHORS.revenueByStream)} className="p-4">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-1.5">
-          <p className="text-secondary text-sm font-medium">
-            All Time Revenue by Stream
-          </p>
-          <InfoTooltip>
-            {paragraphs(
-              "Protocol revenue per month, quarter or year, split into registration base fees, renewals and premiums.",
-              `Formula: each bar = ${code("sum of monthly revenue in that period")}`,
-              "The latest bar is partial: it runs only up to the data cutoff.",
-              REVENUE_BASIS,
-            )}
-          </InfoTooltip>
-        </div>
+        <DeepLinkTitle
+          slug={REVENUE_ANCHORS.revenueByStream}
+          info={
+            <InfoTooltip>
+              {paragraphs(
+                "Protocol revenue per month, quarter or year, split into registration base fees, renewals and premiums.",
+                `Formula: each bar = ${code("sum of monthly revenue in that period")}`,
+                "The latest bar is partial: it runs only up to the data cutoff.",
+                REVENUE_BASIS,
+              )}
+            </InfoTooltip>
+          }
+        >
+          All Time Revenue by Stream
+        </DeepLinkTitle>
         <div className="flex items-center gap-2">
           <span className="text-secondary hidden text-sm font-medium lg:inline">
             View
