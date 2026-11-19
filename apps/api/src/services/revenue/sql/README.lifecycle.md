@@ -9,7 +9,7 @@ same release (step 6).
 
 | File                 | Dune query (production)          | API key         | Columns (unchanged)                                                                    |
 | -------------------- | -------------------------------- | --------------- | -------------------------------------------------------------------------------------- |
-| `active_names.sql`   | 7531711 `active_names_per_month` | `activeNames`   | `month`, `net_change`, `cumulative_active`                                             |
+| `active_names.sql`   | 7531711 `active_names_per_month` | `activeNames`   | `month`, `net_change`, `cumulative_active`, `cumulative_onchain`                       |
 | `renewal_funnel.sql` | 7531722 `renewal_rate_per_month` | `renewalFunnel` | `expiry_month`, `terms_expiring`, `renewed_count`, `churned_count`, `renewal_rate_pct` |
 | `renewal_tenure.sql` | 7531738 `upcoming_expirations`   | `renewalTenure` | `expiry_month`, `tenure_bucket`, `names`, `total_renewals_in_bucket`                   |
 
@@ -102,37 +102,51 @@ Notes on the event model:
 **Intervals.** Per label, events are walked in `(block_number, log_index)` order. An event continues the current
 interval if `block_time <= max(release_dt)` of the label's earlier events. Otherwise (first event, or after the
 release date) it opens a new interval, which is a re-registration. An interval runs from its first event's
-`block_time` to `end_time`, its expiry in the registry of record:
+`block_time` to its end, and it has two ends:
 
-- `max(expires_dt)` in general;
-- for v1-origin intervals (grace 90) whose v1-equivalent end is on or after 2026-09-01, once `now` is past the freeze
-  (2026-10-27 06:01:59 UTC): the ENSv2 expiry, `max(expires_dt) + 5,356,800 s`. These names are unexpired on ENSv2
-  until that date.
+- `paid_end`, the end of the last term that was paid for: `max(expires_dt)`. For v1-origin names this is the
+  v1-equivalent expiry, that is, the ENSv2 expiry without the 62 days ENSv2 added for free.
+- `record_end`, the expiry in the registry of record. For v1-origin intervals (grace 90) whose `paid_end` is on or
+  after 2026-09-01, once `now` is past the freeze (2026-10-27 06:01:59 UTC), it is the ENSv2 expiry,
+  `paid_end + 5,356,800 s`. Otherwise it equals `paid_end`.
 
 Continuity (`release_dt`) is not affected: the release date is the same on both scales.
 
-**Series.** Each interval adds `+1` in the month it starts and `-1` in the month after `end_time`'s month, but only
-once `end_time < now`. `cumulative_active` is the running sum, and rows run to the current month.
+**Series.** Each interval adds `+1` in the month it starts and `-1` in the month after its end's month, but only
+once that end `< now`. Rows run to the current month.
 
-**Month-granular.** A name counts as active in every month that its interval touches, so names that expired earlier
-in the current month still count. As of the production cutoff, the alternatives were:
+| Column               | End used     | Meaning                                                                       |
+| -------------------- | ------------ | ----------------------------------------------------------------------------- |
+| `net_change`         | `paid_end`   | Registrations that started minus names whose paid term ended the month before |
+| `cumulative_active`  | `paid_end`   | Names inside a paid term at some point in the month                           |
+| `cumulative_onchain` | `record_end` | Names still registered on chain at some point in the month                    |
+
+**Why the series is on the paid-term basis (decided by Alex on 2026-11-19).** ENSv2 moved every v1 expiry 62 days
+later. On the registry-of-record basis no name leaves the count in 2026-10 or 2026-11, so those months show a net
+gain equal to their registrations (+5,951 and +2,494) after a year of losing 23k to 37k names a month. That is a
+pause in expirations, not growth. On the paid-term basis the same months are -31,001 and -29,358, and every month
+before 2026-10 is identical on both bases. The on-chain count is kept as `cumulative_onchain`, and the dashboard shows
+it next to the headline.
+
+Run of 2026-11-19: `cumulative_active` 784,310 and `cumulative_onchain` 853,114 for 2026-11. The 68,804 names of
+difference are in their free 62 days without having renewed.
+
+**Month-granular.** A name counts as active in every month that its interval touches, so names whose term ended
+earlier in the current month still count. As of the first production cutoff, the on-chain alternatives were:
 
 - strictly unexpired: 806,482
 - unexpired or in grace: 929,602
 
 Both are from the audit.
 
-**v1-origin names after the freeze.** ENSv2 is the registry of record, and every v1-origin name's ENSv2 expiry is its
-v1 expiry + 62 d, so the series counts them until their ENSv2 expiry. Ending them at the v1-equivalent expiry would
-drop names that are still unexpired on chain: at block 26,337,700, 68,807 of them in 2026-11 (780,354 instead of
-849,161) and about 69.7k from the upcoming expirations.
-
-- **The 2026-09-01 bound** keeps every pre-freeze month unchanged: the shifted intervals had their `-1` in 2026-10 or
-  later. The cost is 8,503 names with a v1 expiry on 2026-08-26..31, whose ENSv2 expiry falls on 2026-10-27..11-01:
-  they stay out of 2026-10 although they were unexpired on ENSv2 for up to 5 days after the freeze.
-- **Migrated names** have no paid event at migration. They keep their v1 interval, now ending at the ENSv2 expiry.
-  Any later ETHRegistrar renewal continues that interval. They are never churned by the migration itself.
-- **Tooltip copy**: "v1 names count until their ENSv2 expiry (v1 expiry + 62 days)".
+- **The 2026-09-01 bound** applies to `cumulative_onchain` only and keeps every pre-freeze month unchanged. The cost
+  is 8,503 names with a v1 expiry on 2026-08-26..31, whose ENSv2 expiry falls on 2026-10-27..11-01: `cumulative_onchain`
+  leaves them out of 2026-10 although they were unexpired on ENSv2 for up to 5 days after the freeze. The paid-term
+  series has no such approximation.
+- **Migrated names** have no paid event at migration. They keep their interval. Any later ETHRegistrar renewal
+  continues it. They are never churned by the migration itself.
+- **Tooltip copy**: "ENSv2 gave every v1 name 62 extra days on chain for free. They are not a paid term and are not
+  counted here."
 
 ### Renewal funnel (`renewal_funnel.sql`)
 
