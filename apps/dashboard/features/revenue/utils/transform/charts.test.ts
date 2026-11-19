@@ -5,6 +5,7 @@ import type {
 } from "@anticapture/client";
 
 import {
+  summarizeActiveNames,
   transformToOverview,
   transformToRenewalTenure,
   transformToStreamSeries,
@@ -204,5 +205,50 @@ describe("transformToOverview", () => {
       "— avg",
       "$50 avg",
     ]);
+  });
+});
+
+describe("summarizeActiveNames", () => {
+  const row = (
+    year: number,
+    zeroIndexedMonth: number,
+    cumulativeActive: number,
+    cumulativeOnchain: number | null,
+  ) => ({
+    date: Date.UTC(year, zeroIndexedMonth, 1) / 1000,
+    netChange: 0,
+    cumulativeActive,
+    cumulativeOnchain,
+  });
+
+  it("reads the latest month, whatever the order of the rows", () => {
+    // Live values of the 2026-11-19 run: paid-term 784,310, on chain 853,114.
+    const rows = [
+      row(2026, 10, 784310, 853114),
+      row(2026, 8, 844669, 844669),
+      row(2026, 9, 813668, 850620),
+    ];
+    expect(summarizeActiveNames(rows)).toEqual({
+      active: 784310,
+      onchain: 853114,
+    });
+  });
+
+  it("shows no second figure while both counts are the same", () => {
+    expect(summarizeActiveNames([row(2026, 8, 844669, 844669)])).toEqual({
+      active: 844669,
+      onchain: null,
+    });
+  });
+
+  it("shows no second figure when the API does not report it", () => {
+    expect(summarizeActiveNames([row(2026, 9, 850578, null)])).toEqual({
+      active: 850578,
+      onchain: null,
+    });
+  });
+
+  it("returns null without rows", () => {
+    expect(summarizeActiveNames([])).toBeNull();
   });
 });

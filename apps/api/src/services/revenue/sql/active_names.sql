@@ -1,12 +1,15 @@
 -- ENS Active .eth Names per Month (variation + cumulative)
--- Columns: month, net_change, cumulative_active (unchanged; mapped by fetchActiveNames).
+-- Columns: month, net_change, cumulative_active, cumulative_onchain (mapped by fetchActiveNames).
 -- Method: build per-name "active intervals" from paid v1 controller events (before the ENSv2 freeze) and ENSv2
 -- ETHRegistrar / ETHRenewerV1 events. An event continues the label's current interval if it happens no later than
 -- the interval's release date so far (max expiry + grace: 90 d for v1-equivalent expiries, 28 d for v2-native
 -- terms); otherwise it starts a new interval (re-registration). Each interval contributes +1 at its start month and
--- -1 at (end month + 1) once its end has passed (max expiry; the ENSv2 expiry for v1-origin names after the freeze,
--- see intervals); the cumulative sum is the active count. Month-granular: a name that expired earlier in the current
--- month still counts for that month.
+-- -1 at (end month + 1) once its end has passed.
+--   net_change, cumulative_active: the end is the end of the last PAID term (max expiry). The 62 days ENSv2 added
+--     to every v1 name for free are not a paid term and are not counted.
+--   cumulative_onchain: the end is the expiry in the registry of record (the ENSv2 expiry for v1-origin names after
+--     the freeze, see intervals): names still registered on chain.
+-- Month-granular: a name whose term ended earlier in the current month still counts for that month.
 
 WITH
 -- Name events, keyed by labelhash = keccak256(label bytes). See README.lifecycle.md for every definition.
@@ -190,35 +193,45 @@ with_interval_id AS (
   FROM flagged
 ),
 
--- end_time is the expiry in the registry of record. Once the freeze has happened, v1-origin intervals (grace 90) whose
--- v1-equivalent end is on or after 2026-09-01 end at their ENSv2 expiry (v1-equivalent + 5,356,800 s): ENSv2 is
--- where they are still unexpired. The 2026-09-01 bound keeps every pre-freeze month as it was (those -1s fall in
--- 2026-10 or later); continuity above stays on the v1-equivalent scale.
+-- Two ends per interval:
+--   paid_end   = the end of the last term that was paid for: max(expires_dt). For v1-origin names this is the
+--                v1-equivalent expiry, that is, the ENSv2 expiry without the 62 days ENSv2 added for free.
+--   record_end = the expiry in the registry of record. Once the freeze has happened, v1-origin intervals (grace 90)
+--                whose paid_end is on or after 2026-09-01 expire on ENSv2 at paid_end + 5,356,800 s. The 2026-09-01
+--                bound keeps every pre-freeze month as it was.
+-- The series (net_change, cumulative_active) uses paid_end, so the one-off 62-day extension does not pause the
+-- departures for two months. cumulative_onchain uses record_end: names still registered on chain.
+-- Continuity above is the same on both scales (v1 expiry + 90 d = ENSv2 expiry + 28 d).
 intervals AS (
   SELECT
     labelhash,
     interval_id,
     MIN(block_time) AS start_time,
+    MAX(expires_dt) AS paid_end,
     MAX(CASE WHEN grace_days = 90
                   AND expires_dt >= TIMESTAMP '2026-09-01 00:00:00 UTC'
                   AND current_timestamp >= TIMESTAMP '2026-10-27 06:01:59 UTC'
              THEN date_add('second', 5356800, expires_dt)
-             ELSE expires_dt END) AS end_time
+             ELSE expires_dt END) AS record_end
   FROM with_interval_id
   GROUP BY labelhash, interval_id
 ),
 
 deltas AS (
-  SELECT date_trunc('month', start_time) AS month, 1 AS delta
+  SELECT date_trunc('month', start_time) AS month, 1 AS paid_delta, 1 AS onchain_delta
   FROM intervals
   UNION ALL
-  SELECT date_trunc('month', end_time) + INTERVAL '1' MONTH AS month, -1 AS delta
+  SELECT date_trunc('month', paid_end) + INTERVAL '1' MONTH AS month, -1 AS paid_delta, 0 AS onchain_delta
   FROM intervals
-  WHERE end_time < current_timestamp
+  WHERE paid_end < current_timestamp
+  UNION ALL
+  SELECT date_trunc('month', record_end) + INTERVAL '1' MONTH AS month, 0 AS paid_delta, -1 AS onchain_delta
+  FROM intervals
+  WHERE record_end < current_timestamp
 ),
 
 monthly_delta AS (
-  SELECT month, SUM(delta) AS net_change
+  SELECT month, SUM(paid_delta) AS net_change, SUM(onchain_delta) AS onchain_change
   FROM deltas
   GROUP BY month
 )
@@ -226,7 +239,8 @@ monthly_delta AS (
 SELECT
   month,
   net_change,
-  SUM(net_change) OVER (ORDER BY month ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_active
+  SUM(net_change) OVER (ORDER BY month ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_active,
+  SUM(onchain_change) OVER (ORDER BY month ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) AS cumulative_onchain
 FROM monthly_delta
 WHERE month <= current_timestamp
 ORDER BY month
