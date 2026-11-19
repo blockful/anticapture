@@ -185,12 +185,17 @@ export type RevenueActiveNamesItem = {
   date: number;
   netChange: number;
   cumulativeActive: number;
+  /** Null while the configured Dune query predates the column. */
+  cumulativeOnchain: number | null;
 };
 
 const RawActiveNamesRowSchema = z.object({
   month: duneMonth,
   net_change: duneNumeric,
   cumulative_active: duneNumeric,
+  // Added with the paid-term basis. Optional so a deployment still pointed
+  // at the earlier query keeps serving the series instead of degrading.
+  cumulative_onchain: duneNumeric.optional(),
 });
 
 export type RevenueNewWalletsItem = {
@@ -349,6 +354,7 @@ export class RevenueDuneClient {
       date: parseDuneMonth(row.month),
       netChange: row.net_change ?? 0,
       cumulativeActive: row.cumulative_active ?? 0,
+      cumulativeOnchain: row.cumulative_onchain ?? null,
     }));
     return { items, meta };
   }

@@ -82,10 +82,20 @@ export const RevenueActiveNamesItemSchema = z
       .describe("Month start (Unix timestamp in seconds, UTC)."),
     netChange: z
       .number()
-      .describe("Net change in active .eth names for the month."),
+      .describe(
+        "Net change in active .eth names for the month: registrations that started minus names whose paid term ended the month before.",
+      ),
     cumulativeActive: z
       .number()
-      .describe("Cumulative count of active .eth names as of the month."),
+      .describe(
+        "Names inside a registration term that was paid for, at some point in the month. The 62 days ENSv2 added to every v1 name for free are not a paid term and are not counted.",
+      ),
+    cumulativeOnchain: z
+      .number()
+      .nullable()
+      .describe(
+        "Names still registered on chain at some point in the month, counting the 62-day ENSv2 extension of v1 names. Equal to cumulativeActive before October 2026. Null when the upstream query does not report it.",
+      ),
   })
   .openapi("RevenueActiveNamesItem", {
     description: "Single active-names datapoint.",
@@ -99,7 +109,7 @@ export const RevenueActiveNamesResponseSchema = z
   })
   .openapi("RevenueActiveNamesResponse", {
     description:
-      "Monthly net change and cumulative count of active .eth names.",
+      "Monthly net change and cumulative count of active .eth names, on a paid-term basis, with the on-chain count alongside.",
   });
 
 export type RevenueActiveNamesResponse = z.infer<

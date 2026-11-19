@@ -281,6 +281,62 @@ describe("RevenueDuneClient", () => {
     ]);
   });
 
+  describe("fetchActiveNames", () => {
+    const month = "2026-10-01 00:00:00.000 UTC";
+
+    it("maps the paid-term series and the on-chain count", async () => {
+      server.use(
+        http.get(urls.activeNames, () =>
+          HttpResponse.json({
+            result: {
+              rows: [
+                {
+                  month,
+                  net_change: -31001,
+                  cumulative_active: 813668,
+                  cumulative_onchain: 850620,
+                },
+              ],
+            },
+          }),
+        ),
+      );
+
+      expect((await client.fetchActiveNames()).items).toEqual([
+        {
+          date: Date.UTC(2026, 9, 1) / 1000,
+          netChange: -31001,
+          cumulativeActive: 813668,
+          cumulativeOnchain: 850620,
+        },
+      ]);
+    });
+
+    it("serves the series with a null on-chain count from a query that predates the column", async () => {
+      server.use(
+        http.get(urls.activeNames, () =>
+          HttpResponse.json({
+            result: {
+              rows: [{ month, net_change: 5951, cumulative_active: 850578 }],
+            },
+          }),
+        ),
+      );
+
+      const result = await client.fetchActiveNames();
+
+      expect(result.meta.degraded).toBe(false);
+      expect(result.items).toEqual([
+        {
+          date: Date.UTC(2026, 9, 1) / 1000,
+          netChange: 5951,
+          cumulativeActive: 850578,
+          cumulativeOnchain: null,
+        },
+      ]);
+    });
+  });
+
   describe("fetchEnsv2Daily", () => {
     const row = {
       day: "2026-10-28 00:00:00.000 UTC",
