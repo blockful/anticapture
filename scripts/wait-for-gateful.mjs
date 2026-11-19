@@ -89,9 +89,19 @@ export const fetchGatefulHealth = async (
 //
 // A kind absent from the map (authful, whose spec is not merged) is not
 // checked at all; it only has to be reachable.
-export const staleUpstreams = (health, staleShasByKind = {}) =>
+//
+// An upstream named in `toleratedDown` is skipped while it is down (see
+// isOnlyToleratedDown). Once it answers again it is checked like any other.
+export const staleUpstreams = (
+  health,
+  staleShasByKind = {},
+  toleratedDown = [],
+) =>
   Object.entries(health.body?.upstreams ?? {})
-    .filter(([, upstream]) => {
+    .filter(([name, upstream]) => {
+      if (upstream?.status !== "ok" && toleratedDown.includes(name)) {
+        return false;
+      }
       const stale = staleShasByKind[upstream?.kind];
       if (!stale?.length) {
         return false;
@@ -100,13 +110,31 @@ export const staleUpstreams = (health, staleShasByKind = {}) =>
     })
     .map(([name]) => name);
 
+// Gateful answers 503 while any upstream is down, and a DAO whose indexer is
+// re-indexing from scratch stays down for days. That would block every release
+// of every other DAO, so the operator can name such upstreams in
+// GATEFUL_TOLERATED_DOWN_UPSTREAMS. The 503 is then accepted only when gateful
+// itself reports "degraded" and every upstream that is not ok is on that list.
+// A down upstream that is not listed still blocks.
+export const isOnlyToleratedDown = (health, toleratedDown = []) => {
+  if (toleratedDown.length === 0) return false;
+  if (health.status !== 503 || health.body?.status !== "degraded") return false;
+  const notOk = Object.entries(health.body?.upstreams ?? {}).filter(
+    ([, upstream]) => upstream?.status !== "ok",
+  );
+  return (
+    notOk.length > 0 && notOk.every(([name]) => toleratedDown.includes(name))
+  );
+};
+
 export const isGatefulReady = (
   health,
   expectedSha,
   staleShasByKind,
   staleGatefulShas = [],
+  toleratedDown = [],
 ) => {
-  if (health.status !== 200) {
+  if (health.status !== 200 && !isOnlyToleratedDown(health, toleratedDown)) {
     return false;
   }
 
@@ -135,7 +163,7 @@ export const isGatefulReady = (
     return false;
   }
 
-  return staleUpstreams(health, staleShasByKind).length === 0;
+  return staleUpstreams(health, staleShasByKind, toleratedDown).length === 0;
 };
 
 export const waitForGateful = async ({
@@ -143,6 +171,7 @@ export const waitForGateful = async ({
   expectedSha,
   staleShasByKind,
   staleGatefulShas,
+  toleratedDown = [],
   timeoutMs = DEFAULT_TIMEOUT_MS,
   intervalMs = DEFAULT_INTERVAL_MS,
   requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS,
@@ -174,8 +203,14 @@ export const waitForGateful = async ({
           expectedSha,
           staleShasByKind,
           staleGatefulShas,
+          toleratedDown,
         )
       ) {
+        if (lastHealth.status !== 200) {
+          logger.log(
+            `::warning::Proceeding with gateful degraded: tolerated down upstreams: ${toleratedDown.join(", ")}`,
+          );
+        }
         logger.log(
           expectedSha
             ? `Gateful ready after attempt ${attempt}: commit ${
@@ -187,7 +222,7 @@ export const waitForGateful = async ({
         return { ready: true, attempt, lastHealth };
       }
 
-      const stale = staleUpstreams(lastHealth, staleShasByKind);
+      const stale = staleUpstreams(lastHealth, staleShasByKind, toleratedDown);
 
       logger.log(
         `attempt ${attempt}: HTTP ${lastHealth.status}, commit ${
@@ -242,11 +277,21 @@ const main = async () => {
     .split(",")
     .filter(Boolean);
 
+  // Names of upstreams (as gateful's /health lists them, e.g. "scr") allowed
+  // to be down without blocking the release. See isOnlyToleratedDown.
+  const toleratedDown = (
+    readNonEmptyValue(process.env.GATEFUL_TOLERATED_DOWN_UPSTREAMS) ?? ""
+  )
+    .split(",")
+    .map((name) => name.trim())
+    .filter(Boolean);
+
   const result = await waitForGateful({
     baseUrl,
     expectedSha,
     staleShasByKind,
     staleGatefulShas,
+    toleratedDown,
     timeoutMs,
     intervalMs,
     requestTimeoutMs,
