@@ -2,6 +2,7 @@ import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayou
 import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 
 import { DataFreshness } from "@/features/revenue/components/DataFreshness";
+import { Ensv2Section } from "@/features/revenue/components/Ensv2Section";
 import { KpiRow } from "@/features/revenue/components/KpiRow";
 import { MonthlyRevenueChart } from "@/features/revenue/components/MonthlyRevenueChart";
 import { NameGrowthChart } from "@/features/revenue/components/NameGrowthChart";
@@ -32,16 +33,19 @@ export const RevenueSection = () => {
         {/* Section 3 — Stream Breakdown */}
         <RevenueOverviewCard />
 
-        {/* Section 4 — Usage & Adoption + KPI Row */}
+        {/* Section 4 — ENSv2: revenue and migration since the launch */}
+        <Ensv2Section />
+
+        {/* Section 5 — Usage & Adoption + KPI Row */}
         <KpiRow />
 
-        {/* Section 5 — Name Growth & Churn */}
+        {/* Section 6 — Name Growth & Churn */}
         <NameGrowthChart />
 
-        {/* Section 6 — New Users Entering ENS */}
+        {/* Section 7 — New Users Entering ENS */}
         <NewUsersChart />
 
-        {/* Section 7 — Bottom Row */}
+        {/* Section 8 — Bottom Row */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <UpcomingExpirationsChart />
           <RenewalRateCohort />

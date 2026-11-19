@@ -22,6 +22,7 @@ import { docs } from "@/docs";
 import { env } from "@/env";
 import actionsFixture from "@/services/revenue/__fixtures__/actions.json";
 import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.json";
+import ensv2DailyFixture from "@/services/revenue/__fixtures__/ensv2-daily.json";
 import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
 import renewalFunnelFixture from "@/services/revenue/__fixtures__/renewal-funnel.json";
 import renewalTenureFixture from "@/services/revenue/__fixtures__/renewal-tenure.json";
@@ -30,7 +31,6 @@ import revenueTotalsFixture from "@/services/revenue/__fixtures__/revenue-totals
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
-  RevenueDuneUrls,
   RevenueQueryKey,
 } from "@/services/revenue/dune-client";
 
@@ -99,6 +99,13 @@ const REVENUE_ENDPOINTS: readonly RevenueEndpointDef[] = [
     operationId: "getRevenueRenewalTenure",
     responseSchemaName: "RevenueRenewalTenureResponse",
   },
+  {
+    path: "/revenue/ensv2-daily",
+    urlKey: "ensv2Daily",
+    fixture: ensv2DailyFixture,
+    operationId: "getRevenueEnsv2Daily",
+    responseSchemaName: "RevenueEnsv2DailyResponse",
+  },
 ];
 
 const API_KEY = "test-api-key";
@@ -117,10 +124,13 @@ type RevenueBody = {
 };
 const FIXTURE_BASE = "https://dune.test";
 
-function buildUrls(base = FIXTURE_BASE): RevenueDuneUrls {
-  return REVENUE_QUERY_KEYS.reduce<RevenueDuneUrls>(
+/** Every query configured, including the optional ones. */
+type AllRevenueUrls = Record<RevenueQueryKey, string>;
+
+function buildUrls(base = FIXTURE_BASE): AllRevenueUrls {
+  return REVENUE_QUERY_KEYS.reduce<AllRevenueUrls>(
     (acc, key, idx) => ({ ...acc, [key]: `${base}/${idx}/results` }),
-    {} as RevenueDuneUrls,
+    {} as AllRevenueUrls,
   );
 }
 
@@ -139,7 +149,7 @@ afterEach(() => {
 afterAll(() => server.close());
 
 describe("Revenue Controller", () => {
-  let urls: RevenueDuneUrls;
+  let urls: AllRevenueUrls;
 
   beforeEach(() => {
     env.DAO_ID = DaoIdEnum.ENS;
@@ -857,6 +867,65 @@ describe("Revenue Controller", () => {
     });
   });
 
+  describe("ENSv2 daily without its query ID", () => {
+    it("answers empty, degraded and uncached, and leaves the other routes alone", async () => {
+      let ensv2Hits = 0;
+      server.use(
+        http.get(urls.ensv2Daily, () => {
+          ensv2Hits += 1;
+          return HttpResponse.json(ensv2DailyFixture);
+        }),
+        http.get(urls.revenueTotals, () =>
+          HttpResponse.json(revenueTotalsFixture),
+        ),
+      );
+      const { ensv2Daily: _unset, ...required } = urls;
+      const app = createTestApp(new RevenueDuneClient(API_KEY, required));
+
+      const res = await app.request("/revenue/ensv2-daily");
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual(UNCONFIGURED_BODY);
+      expect(res.headers.get("cache-control")).toBe("no-store");
+      expect(ensv2Hits).toBe(0);
+
+      const totals = await app.request("/revenue/totals");
+      expect(totals.status).toBe(200);
+      expect(((await totals.json()) as RevenueBody).meta).toEqual(HEALTHY_META);
+    });
+
+    it("sorts by day in both directions and filters by range", async () => {
+      server.use(
+        http.get(urls.ensv2Daily, () => HttpResponse.json(ensv2DailyFixture)),
+      );
+      const app = createTestApp(new RevenueDuneClient(API_KEY, urls));
+      const launch = Date.UTC(2026, 9, 27) / 1000;
+
+      const asc = (await (
+        await app.request("/revenue/ensv2-daily")
+      ).json()) as RevenueBody;
+      expect(asc.items[0]?.date).toBe(launch);
+      expect(asc.items.map((i) => i.date)).toEqual(
+        [...asc.items.map((i) => i.date)].sort((a, b) => a - b),
+      );
+
+      const desc = (await (
+        await app.request("/revenue/ensv2-daily?orderDirection=desc")
+      ).json()) as RevenueBody;
+      expect(desc.items[desc.items.length - 1]?.date).toBe(launch);
+
+      const ranged = (await (
+        await app.request(
+          `/revenue/ensv2-daily?fromDate=${launch + 86_400}&toDate=${launch + 2 * 86_400}`,
+        )
+      ).json()) as RevenueBody;
+      expect(ranged.items.map((i) => i.date)).toEqual([
+        launch + 86_400,
+        launch + 2 * 86_400,
+      ]);
+      expect(ranged.totalCount).toBe(2);
+    });
+  });
+
   describe("Revenue API surface (US-011)", () => {
     it("returns 200 with the expected shape for every endpoint", async () => {
       for (const endpoint of REVENUE_ENDPOINTS) {
@@ -896,6 +965,7 @@ describe("Revenue Controller", () => {
         revenueTotals: 0,
         revenueByCategory: 0,
         renewalTenure: 0,
+        ensv2Daily: 0,
       };
 
       for (const endpoint of REVENUE_ENDPOINTS) {

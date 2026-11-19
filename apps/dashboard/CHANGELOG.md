@@ -1,5 +1,21 @@
 # @anticapture/dashboard
 
+## 2.18.1
+
+### Patch Changes
+
+- [#2202](https://github.com/blockful/anticapture/pull/2202) [`238a2e3`](https://github.com/blockful/anticapture/commit/238a2e32807982b96cb3065c413a405d6ecfa007) Thanks [@alextnetto](https://github.com/alextnetto)! - Scrollbars now match the app: a dimmed thumb on a transparent track, instead of the browser's light scrollbar with a white track on the dark interface.
+
+## 2.18.0
+
+### Minor Changes
+
+- [#2198](https://github.com/blockful/anticapture/pull/2198) [`9c0aa11`](https://github.com/blockful/anticapture/commit/9c0aa11a666ec5e54712cece6dc157f16d5a51ab) Thanks [@alextnetto](https://github.com/alextnetto)! - ENS revenue has an ENSv2 section: revenue since the ENSv2 launch, the share of v1 names migrated, new ENSv2 registrations and renewals, with daily charts of revenue and migration. The API serves the series at `/revenue/ensv2-daily` (set `REVENUE_DUNE_ENSV2_DAILY_QUERY_ID`).
+
+### Patch Changes
+
+- [#2198](https://github.com/blockful/anticapture/pull/2198) [`c293b1a`](https://github.com/blockful/anticapture/commit/c293b1aba0636f8dcbbe572a6867834f1e8608e4) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue tooltips are easier to read: one idea per paragraph, with formulas and computed values in a monospace font. The Name Growth chart marks the ENSv2 launch and explains that October and November 2026 show no departures because every v1 expiry moved 62 days later.
+
 ## 2.17.6
 
 ### Patch Changes

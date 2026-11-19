@@ -5,6 +5,7 @@ import { Clock } from "lucide-react";
 import {
   useGetRevenueActions,
   useGetRevenueActiveNames,
+  useGetRevenueEnsv2Daily,
   useGetRevenueNewWallets,
   useGetRevenueRenewalFunnel,
   useGetRevenueRenewalTenure,
@@ -33,15 +34,16 @@ export const DataFreshness = () => {
   const funnel = useGetRevenueRenewalFunnel("ens").data;
   const activeNames = useGetRevenueActiveNames("ens").data;
   const tenure = useGetRevenueRenewalTenure("ens").data;
+  const ensv2 = useGetRevenueEnsv2Daily("ens").data;
 
   const freshness = useMemo(
     () =>
       summarizeFreshness(
-        [totals, actions, newWallets, funnel, activeNames, tenure].map(
+        [totals, actions, newWallets, funnel, activeNames, tenure, ensv2].map(
           readRevenueMeta,
         ),
       ),
-    [totals, actions, newWallets, funnel, activeNames, tenure],
+    [totals, actions, newWallets, funnel, activeNames, tenure, ensv2],
   );
 
   if (!freshness.reported) return null;

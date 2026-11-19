@@ -1,7 +1,10 @@
 import {
   formatCompact,
+  formatDayLabel,
+  formatInteger,
   formatMillions,
   formatMonthRange,
+  formatPercent,
   formatUsd,
   formatUtcDateTime,
 } from "@/features/revenue/utils/format";
@@ -86,5 +89,35 @@ describe("date labels", () => {
     expect(formatUtcDateTime(new Date("2026-09-23T00:09:06Z"))).toBe(
       "Sep 23, 2026, 00:09 UTC",
     );
+  });
+});
+
+describe("formatDayLabel", () => {
+  const oct27 = Date.UTC(2026, 9, 27) / 1000;
+
+  it("prints the UTC month and day", () => {
+    expect(formatDayLabel(oct27)).toBe("Oct 27");
+    // 23:59:59 UTC is still the same UTC day, whatever the local zone.
+    expect(formatDayLabel(oct27 + 86_399)).toBe("Oct 27");
+    expect(formatDayLabel(oct27 + 86_400)).toBe("Oct 28");
+  });
+
+  it("adds a two-digit year on request", () => {
+    expect(formatDayLabel(oct27, true)).toBe("Oct 27 '26");
+    expect(formatDayLabel(Date.UTC(2027, 0, 1) / 1000, true)).toBe("Jan 1 '27");
+  });
+});
+
+describe("formatInteger and formatPercent", () => {
+  it("prints whole numbers with thousands separators", () => {
+    expect(formatInteger(919728)).toBe("919,728");
+    expect(formatInteger(0)).toBe("0");
+    expect(formatInteger(1234.6)).toBe("1,235");
+  });
+
+  it("prints a share with fixed decimals", () => {
+    expect(formatPercent(3.4043)).toBe("3.40%");
+    expect(formatPercent(96.995, 0)).toBe("97%");
+    expect(formatPercent(0)).toBe("0.00%");
   });
 });
