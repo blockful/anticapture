@@ -89,25 +89,7 @@ export function votes(app: Hono, service: VotesService) {
       },
     }),
     async (context) => {
-      const {
-        limit,
-        skip,
-        orderBy,
-        orderDirection,
-        fromDate,
-        toDate,
-        support,
-      } = context.req.valid("query");
-
-      const result = await service.getVotes({
-        limit,
-        skip,
-        orderBy,
-        orderDirection,
-        fromDate,
-        toDate,
-        support,
-      });
+      const result = await service.getVotes(context.req.valid("query"));
 
       return context.json(result);
     },

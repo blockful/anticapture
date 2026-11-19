@@ -123,7 +123,7 @@ export const TabsDidntVoteContent = ({
             <div className="flex h-10 w-full items-center gap-3 p-2">
               <button
                 onClick={() => onAddressClick?.(voterAddress)}
-                className="group cursor-pointer"
+                className="group min-w-0 cursor-pointer"
               >
                 <EnsAvatar
                   address={voterAddress as `0x${string}`}
@@ -136,7 +136,7 @@ export const TabsDidntVoteContent = ({
               </button>
               <CopyAndPasteButton
                 textToCopy={voterAddress}
-                className="size-2"
+                className="size-2 shrink-0"
                 iconSize="md"
               />
             </div>

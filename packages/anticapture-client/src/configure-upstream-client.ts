@@ -15,6 +15,11 @@ export function configureUpstreamClient(): void {
 
   setConfig({
     baseURL,
+    // Repeat array params (`type=VOTE&type=PROPOSAL`) instead of axios's
+    // default bracket form (`type[]=VOTE`), which the API does not parse —
+    // bracketed arrays were silently dropped, ignoring filters like
+    // `voterAddressIn` and `type`.
+    paramsSerializer: { indexes: null },
     headers: {
       "x-client-source": "anticapture-mcp",
       ...(useSharedKey ? { Authorization: `Bearer ${apiKey}` } : {}),
