@@ -1,5 +1,15 @@
 # @anticapture/api
 
+## 1.9.1
+
+### Patch Changes
+
+- [#2145](https://github.com/blockful/anticapture/pull/2145) [`15bb5e0`](https://github.com/blockful/anticapture/commit/15bb5e0b7fc9e475cd6896887b55d71988e4e705) Thanks [@brunod-e](https://github.com/brunod-e)! - Accept comma-delimited address lists in query params as documented.
+
+- [#2145](https://github.com/blockful/anticapture/pull/2145) [`15bb5e0`](https://github.com/blockful/anticapture/commit/15bb5e0b7fc9e475cd6896887b55d71988e4e705) Thanks [@brunod-e](https://github.com/brunod-e)! - Speed up the feed events address filter to stop gateway timeouts on large DAOs.
+
+- [#2145](https://github.com/blockful/anticapture/pull/2145) [`15bb5e0`](https://github.com/blockful/anticapture/commit/15bb5e0b7fc9e475cd6896887b55d71988e4e705) Thanks [@brunod-e](https://github.com/brunod-e)! - Apply the voterAddressIn filter on the all-votes endpoint.
+
 ## 1.9.0
 
 ### Minor Changes
