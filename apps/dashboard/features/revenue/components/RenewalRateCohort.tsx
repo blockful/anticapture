@@ -3,13 +3,16 @@
 import { useMemo } from "react";
 import { useGetRevenueRenewalFunnel } from "@anticapture/client/hooks";
 
+import { DeepLinkTitle } from "@/shared/components/deep-link";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ProgressBar } from "@/shared/components/design-system/progress-bar/ProgressBar";
+import { deepLinkTarget } from "@/shared/utils/deepLink";
 
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
+import { REVENUE_ANCHORS } from "@/features/revenue/utils/anchors";
 import { formatUtcDate } from "@/features/revenue/utils/format";
 import { toRenewalCohortCutoff } from "@/features/revenue/utils/meta";
 import { transformToRenewalCohorts } from "@/features/revenue/utils/transform";
@@ -28,20 +31,25 @@ export const RenewalRateCohort = () => {
   );
 
   return (
-    <Card className="flex flex-col p-4">
-      <div className="flex items-center gap-1.5">
-        <p className="text-secondary text-sm font-medium">
-          Renewal Rate by Expiry Year
-        </p>
-        <InfoTooltip>
-          {paragraphs(
-            "Share of .eth registration terms expiring in each year that were renewed before the end of their grace period (90 days after expiry; 28 days for names registered on ENSv2).",
-            `Formula: ${code("renewed terms ÷ expiring terms × 100")}, per expiry year.`,
-            "Each registration or renewal is one term, so a name renewed several times counts several times. A renewal that leaves the name still expired (a grace-period top-up) is not a term. Names registered before ENSv2 are grouped by their v1 expiry (their ENSv2 expiry minus 62 days).",
-            `Only terms whose grace period has ended are included${meta.asOf ? ` (expiring before ${formatUtcDate(toRenewalCohortCutoff(meta.asOf))}, 90 days before the data cutoff)` : ""}, so the latest year is partial.`,
-          )}
-        </InfoTooltip>
-      </div>
+    <Card
+      {...deepLinkTarget(REVENUE_ANCHORS.renewalRateByYear)}
+      className="flex flex-col p-4"
+    >
+      <DeepLinkTitle
+        slug={REVENUE_ANCHORS.renewalRateByYear}
+        info={
+          <InfoTooltip>
+            {paragraphs(
+              "Share of .eth registration terms expiring in each year that were renewed before the end of their grace period (90 days after expiry; 28 days for names registered on ENSv2).",
+              `Formula: ${code("renewed terms ÷ expiring terms × 100")}, per expiry year.`,
+              "Each registration or renewal is one term, so a name renewed several times counts several times. A renewal that leaves the name still expired (a grace-period top-up) is not a term. Names registered before ENSv2 are grouped by their v1 expiry (their ENSv2 expiry minus 62 days).",
+              `Only terms whose grace period has ended are included${meta.asOf ? ` (expiring before ${formatUtcDate(toRenewalCohortCutoff(meta.asOf))}, 90 days before the data cutoff)` : ""}, so the latest year is partial.`,
+            )}
+          </InfoTooltip>
+        }
+      >
+        Renewal Rate by Expiry Year
+      </DeepLinkTitle>
       <p className="text-secondary mt-0.5 text-sm">
         Percentage of expiring terms renewed, by expiry year
       </p>

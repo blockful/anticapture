@@ -4,10 +4,12 @@ import { useMemo, useState } from "react";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { useGetRevenueTotals } from "@anticapture/client/hooks";
 
+import { DeepLinkTitle } from "@/shared/components/deep-link";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { cn } from "@/shared/utils/cn";
+import { deepLinkTarget } from "@/shared/utils/deepLink";
 
 import {
   InfoTooltip,
@@ -15,6 +17,7 @@ import {
 } from "@/features/revenue/components/InfoTooltip";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import type { RevenueTimeframe } from "@/features/revenue/types";
+import { REVENUE_ANCHORS } from "@/features/revenue/utils/anchors";
 import { REVENUE_BASIS } from "@/features/revenue/utils/copy";
 import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
@@ -48,21 +51,26 @@ export const RevenueSummaryCard = () => {
   return (
     <Card>
       <div className="grid grid-cols-1 lg:grid-cols-2">
-        <div className="border-border-default border-b p-4 lg:border-b-0 lg:border-r">
+        <div
+          {...deepLinkTarget(REVENUE_ANCHORS.protocolRevenue)}
+          className="border-border-default border-b p-4 lg:border-b-0 lg:border-r"
+        >
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1.5">
-              <p className="text-secondary text-sm font-medium">
-                Protocol Revenue (actual)
-              </p>
-              <InfoTooltip>
-                {paragraphs(
-                  `Protocol revenue in the selected period${summary ? ` (${summary.actualPeriod})` : ""}.`,
-                  `Formula: ${code("sum of monthly revenue in the period")}`,
-                  "1Y is the last 12 full months before the data cutoff. YTD and MAX run up to the cutoff, so their latest month is partial.",
-                  REVENUE_BASIS,
-                )}
-              </InfoTooltip>
-            </div>
+            <DeepLinkTitle
+              slug={REVENUE_ANCHORS.protocolRevenue}
+              info={
+                <InfoTooltip>
+                  {paragraphs(
+                    `Protocol revenue in the selected period${summary ? ` (${summary.actualPeriod})` : ""}.`,
+                    `Formula: ${code("sum of monthly revenue in the period")}`,
+                    "1Y is the last 12 full months before the data cutoff. YTD and MAX run up to the cutoff, so their latest month is partial.",
+                    REVENUE_BASIS,
+                  )}
+                </InfoTooltip>
+              }
+            >
+              Protocol Revenue (actual)
+            </DeepLinkTitle>
             <SegmentedControl
               items={TIMEFRAME_OPTIONS}
               value={timeframe}
@@ -102,21 +110,23 @@ export const RevenueSummaryCard = () => {
           )}
         </div>
 
-        <div className="p-4">
-          <div className="flex items-center gap-1.5">
-            <p className="text-secondary text-sm font-medium">
-              Annualized run rate
-            </p>
-            <InfoTooltip>
-              {paragraphs(
-                `Average daily protocol revenue in the last 3 full months covered by the data${summary ? ` (${summary.runRatePeriod})` : ""}, multiplied by 365.`,
-                `Formula: ${code("revenue of the 3 months ÷ days in them × 365")}`,
-                summary && code(summary.runRateFormula),
-                REVENUE_BASIS,
-                "A run rate annualizes recent revenue; it is not a forecast.",
-              )}
-            </InfoTooltip>
-          </div>
+        <div {...deepLinkTarget(REVENUE_ANCHORS.runRate)} className="p-4">
+          <DeepLinkTitle
+            slug={REVENUE_ANCHORS.runRate}
+            info={
+              <InfoTooltip>
+                {paragraphs(
+                  `Average daily protocol revenue in the last 3 full months covered by the data${summary ? ` (${summary.runRatePeriod})` : ""}, multiplied by 365.`,
+                  `Formula: ${code("revenue of the 3 months ÷ days in them × 365")}`,
+                  summary && code(summary.runRateFormula),
+                  REVENUE_BASIS,
+                  "A run rate annualizes recent revenue; it is not a forecast.",
+                )}
+              </InfoTooltip>
+            }
+          >
+            Annualized run rate
+          </DeepLinkTitle>
           {isLoading ? (
             <>
               <div className="bg-surface-raised mt-2 h-9 w-36 animate-pulse rounded" />

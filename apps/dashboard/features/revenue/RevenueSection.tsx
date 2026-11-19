@@ -1,4 +1,5 @@
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
+import { DeepLinkArrival } from "@/shared/components/deep-link";
 import { ReportPanelButton } from "@/shared/components/report/ReportPanelButton";
 
 import { DataFreshness } from "@/features/revenue/components/DataFreshness";
@@ -20,6 +21,9 @@ export const RevenueSection = () => {
       hideDivider
       headerAction={<ReportPanelButton panel="Revenue" />}
     >
+      {/* Opens the page at the block named in the URL hash (utils/anchors.ts) */}
+      <DeepLinkArrival />
+
       <div className="flex flex-col gap-4 pb-8">
         {/* Data cutoff and delay warning for every card below */}
         <DataFreshness />

@@ -8,13 +8,16 @@ import {
   useGetRevenueTotals,
 } from "@anticapture/client/hooks";
 
+import { DeepLinkTitle } from "@/shared/components/deep-link";
 import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control/SegmentedControl";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { cn } from "@/shared/utils/cn";
+import { deepLinkTarget } from "@/shared/utils/deepLink";
 
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
+import { REVENUE_ANCHORS } from "@/features/revenue/utils/anchors";
 import type { RevenueDataState } from "@/features/revenue/utils/meta";
 import { computeKpis } from "@/features/revenue/utils/transform";
 import type { KpiWindow } from "@/features/revenue/utils/window";
@@ -35,7 +38,13 @@ const WINDOW_BY_PERIOD: Record<string, KpiWindow> = {
   max: { months: null, label: "MAX" },
 };
 
-const KPI_COUNT = 3;
+/** The block each KPI links to, in the order `computeKpis` returns the KPIs. */
+const KPI_ANCHORS = [
+  REVENUE_ANCHORS.newWallets,
+  REVENUE_ANCHORS.renewalRate,
+  REVENUE_ANCHORS.revenueByPeriod,
+];
+const KPI_COUNT = KPI_ANCHORS.length;
 
 const PERCENTAGE_POINTS_TOOLTIP =
   "Percentage points: the absolute change between two percentages. Going from 30% to 39% is +9pp, not +9%.";
@@ -79,10 +88,12 @@ export const KpiRow = () => {
   }, [isLoading, newWallets, funnel, totals, activeWindow]);
 
   return (
-    <Card>
+    <Card {...deepLinkTarget(REVENUE_ANCHORS.usageAndAdoption)}>
       {/* Header row */}
-      <div className="border-border-default flex items-center justify-between border-b p-4">
-        <p className="text-secondary text-sm font-medium">Usage & Adoption</p>
+      <div className="border-border-default flex items-center justify-between gap-3 border-b p-4">
+        <DeepLinkTitle slug={REVENUE_ANCHORS.usageAndAdoption}>
+          Usage & Adoption
+        </DeepLinkTitle>
 
         {/* Desktop: SegmentedControl */}
         <SegmentedControl
@@ -109,87 +120,88 @@ export const KpiRow = () => {
 
       {/* KPI columns — stacked on mobile, 3 columns on desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3">
-        {isLoading || !kpis
-          ? Array.from({ length: KPI_COUNT }).map((_, index) => (
-              <div
-                key={index}
-                className={cn(
-                  "p-4",
-                  index < KPI_COUNT - 1 &&
-                    "border-border-default border-b lg:border-b-0 lg:border-r",
-                )}
-              >
-                <div className="bg-surface-raised h-4 w-24 animate-pulse rounded" />
-                <div className="bg-surface-raised mt-2 h-9 w-20 animate-pulse rounded" />
-                <div className="bg-surface-raised mt-2 h-4 w-32 animate-pulse rounded" />
-              </div>
-            ))
-          : kpis.map((kpi, index) => (
-              <div
-                key={kpi.title}
-                className={cn(
-                  "p-4",
-                  index < kpis.length - 1 &&
-                    "border-border-default border-b lg:border-b-0 lg:border-r",
-                )}
-              >
-                <div className="flex items-center gap-1.5">
-                  <p className="text-secondary text-sm font-medium">
-                    {kpi.title}
-                  </p>
-                  <InfoTooltip>{kpi.tooltip}</InfoTooltip>
-                </div>
-                <p
-                  className={cn(
-                    "mt-1 text-[30px] font-medium leading-9",
-                    kpi.unavailable ? "text-secondary" : "text-primary",
-                  )}
-                >
-                  {kpi.value}
-                </p>
-                <p className="text-secondary mt-1 flex items-center gap-1 text-sm">
-                  {kpi.trend === "up" && (
-                    <ArrowUp className="text-success size-3.5" />
-                  )}
-                  {kpi.trend === "down" && (
-                    <ArrowDown className="size-3.5 text-[#f87171]" />
-                  )}
-                  <span
-                    className={
-                      kpi.trend === "up"
-                        ? "text-success"
-                        : kpi.trend === "down"
-                          ? "text-[#f87171]"
-                          : "text-secondary"
-                    }
+        {KPI_ANCHORS.map((anchor, index) => {
+          const kpi = isLoading ? undefined : kpis?.[index];
+          return (
+            // The tile is on the page while it loads, so a link to it has
+            // somewhere to land before the data arrives.
+            <div
+              key={anchor}
+              {...deepLinkTarget(anchor)}
+              className={cn(
+                "p-4",
+                index < KPI_COUNT - 1 &&
+                  "border-border-default border-b lg:border-b-0 lg:border-r",
+              )}
+            >
+              {!kpi ? (
+                <>
+                  <div className="bg-surface-raised h-4 w-24 animate-pulse rounded" />
+                  <div className="bg-surface-raised mt-2 h-9 w-20 animate-pulse rounded" />
+                  <div className="bg-surface-raised mt-2 h-4 w-32 animate-pulse rounded" />
+                </>
+              ) : (
+                <>
+                  <DeepLinkTitle
+                    slug={anchor}
+                    info={<InfoTooltip>{kpi.tooltip}</InfoTooltip>}
                   >
-                    {kpi.delta ? (
-                      <>
-                        {kpi.delta.value}
-                        {kpi.delta.unit === "pp" ? (
-                          <Tooltip
-                            asChild
-                            tooltipContent={
-                              <p className="text-secondary text-sm font-normal leading-5">
-                                {PERCENTAGE_POINTS_TOOLTIP}
-                              </p>
-                            }
-                            triggerClassName="cursor-help underline decoration-dotted underline-offset-2"
-                          >
-                            <span>{kpi.delta.unit}</span>
-                          </Tooltip>
-                        ) : (
-                          kpi.delta.unit
-                        )}{" "}
-                        {kpi.delta.comparison}
-                      </>
-                    ) : (
-                      kpi.subtext
+                    {kpi.title}
+                  </DeepLinkTitle>
+                  <p
+                    className={cn(
+                      "mt-1 text-[30px] font-medium leading-9",
+                      kpi.unavailable ? "text-secondary" : "text-primary",
                     )}
-                  </span>
-                </p>
-              </div>
-            ))}
+                  >
+                    {kpi.value}
+                  </p>
+                  <p className="text-secondary mt-1 flex items-center gap-1 text-sm">
+                    {kpi.trend === "up" && (
+                      <ArrowUp className="text-success size-3.5" />
+                    )}
+                    {kpi.trend === "down" && (
+                      <ArrowDown className="size-3.5 text-[#f87171]" />
+                    )}
+                    <span
+                      className={
+                        kpi.trend === "up"
+                          ? "text-success"
+                          : kpi.trend === "down"
+                            ? "text-[#f87171]"
+                            : "text-secondary"
+                      }
+                    >
+                      {kpi.delta ? (
+                        <>
+                          {kpi.delta.value}
+                          {kpi.delta.unit === "pp" ? (
+                            <Tooltip
+                              asChild
+                              tooltipContent={
+                                <p className="text-secondary text-sm font-normal leading-5">
+                                  {PERCENTAGE_POINTS_TOOLTIP}
+                                </p>
+                              }
+                              triggerClassName="cursor-help underline decoration-dotted underline-offset-2"
+                            >
+                              <span>{kpi.delta.unit}</span>
+                            </Tooltip>
+                          ) : (
+                            kpi.delta.unit
+                          )}{" "}
+                          {kpi.delta.comparison}
+                        </>
+                      ) : (
+                        kpi.subtext
+                      )}
+                    </span>
+                  </p>
+                </>
+              )}
+            </div>
+          );
+        })}
       </div>
     </Card>
   );
