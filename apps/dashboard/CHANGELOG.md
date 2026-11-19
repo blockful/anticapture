@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.20.0
+
+### Minor Changes
+
+- [#2215](https://github.com/blockful/anticapture/pull/2215) [`b01d015`](https://github.com/blockful/anticapture/commit/b01d015e33a064afca4da377be1e6ae5b28c7b48) Thanks [@alextnetto](https://github.com/alextnetto)! - Every titled block of the revenue page now has its own link, such as `/ens/revenue#renewal-rate-by-year`. Clicking a title copies the link and puts it in the address bar. Opening the link scrolls to the block and pulses its border once.
+
 ## 2.19.2
 
 ### Patch Changes
