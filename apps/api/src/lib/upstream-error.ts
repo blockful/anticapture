@@ -10,11 +10,19 @@ export type Upstream = "coingecko" | "compound" | "defillama" | "dune";
  * Why the provider could not answer.
  *
  * `unavailable` is the transient case that should clear on its own.
- * `not_found` is a resource the provider says is gone: it will not recover by
- * itself, so operators need to see it apart from an outage even though both
- * degrade rather than 5xx.
+ * `not_found` is a resource the provider says it does not have: it will not
+ * recover by itself, so operators need to see it apart from an outage even
+ * though both degrade rather than 5xx. For a Dune results endpoint it means
+ * the query has no completed execution for its latest version, or the result
+ * expired: the query needs a re-run, not a new id.
+ * `payment_required` is a provider refusing to answer under the account's
+ * billing limits (HTTP 402). Only callers that opt in degrade it; it will not
+ * clear until the account is paid for.
  */
-export type UpstreamFailureReason = "unavailable" | "not_found";
+export type UpstreamFailureReason =
+  | "unavailable"
+  | "not_found"
+  | "payment_required";
 
 /**
  * Deadline for every third-party call. Without one a hanging provider is
@@ -164,7 +172,8 @@ export const classifyAxiosFailure = (
 ): HTTPException => {
   const status = isAxiosError(error) ? error.response?.status : undefined;
   // A 404 is a resource the provider says is gone: a renamed DefiLlama slug,
-  // a deleted Dune query, a token CoinGecko no longer lists. Before this
+  // a Dune query with no completed execution for its latest version (or an
+  // expired result), a token CoinGecko no longer lists. Before this
   // classification existed the route served an empty 200, and a 502 here
   // would trip the DAO's gateway breaker over one chart. It degrades under
   // `not_found`, which the log, the metric and the alert keep apart from an

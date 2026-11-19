@@ -7,28 +7,85 @@ export type KpiWindow = {
   label: string;
 };
 
-export type WindowSlice<T> = {
-  current: T[];
-  /**
-   * The window immediately before `current`. Null when MAX is selected or when
-   * the dataset is too short to produce a full previous window — in both cases
-   * the caller should degrade and skip the delta.
-   */
-  previous: T[] | null;
+// --- Calendar windows ------------------------------------------------------
+
+const SECONDS_PER_DAY = 86_400;
+
+/** Month index counted from year 0, so consecutive months differ by 1. */
+const toMonthIndex = (unixSeconds: number): number => {
+  const d = new Date(unixSeconds * 1000);
+  return d.getUTCFullYear() * 12 + d.getUTCMonth();
+};
+
+const monthIndexToStart = (monthIndex: number): number =>
+  Date.UTC(Math.floor(monthIndex / 12), monthIndex % 12, 1) / 1000;
+
+/**
+ * A run of whole calendar months. `start` is the first month's start and
+ * `end` the exclusive end (start of the month after the last one), both in
+ * Unix seconds UTC.
+ */
+export type CalendarWindow = {
+  start: number;
+  end: number;
+  /** Start of the last month in the window, for labels. */
+  lastMonthStart: number;
+  months: number;
+  days: number;
+};
+
+const buildCalendarWindow = (
+  firstMonthIndex: number,
+  months: number,
+): CalendarWindow => {
+  const start = monthIndexToStart(firstMonthIndex);
+  const end = monthIndexToStart(firstMonthIndex + months);
+  return {
+    start,
+    end,
+    lastMonthStart: monthIndexToStart(firstMonthIndex + months - 1),
+    months,
+    days: (end - start) / SECONDS_PER_DAY,
+  };
 };
 
 /**
- * Splits a chronologically-sorted series into the latest window and the one
- * immediately before it. Used to compute "current vs previous period" deltas.
+ * The `months` calendar months fully covered by data that ends at `cutoff`
+ * (month end <= cutoff), plus the same number of months right before them.
+ * The month holding the cutoff is never included: it is only partly covered.
  */
-export function splitIntoWindows<T>(
+export function fullMonthWindows(
+  cutoff: Date,
+  months: number,
+): { current: CalendarWindow; previous: CalendarWindow } {
+  const cutoffMonthIndex = cutoff.getUTCFullYear() * 12 + cutoff.getUTCMonth();
+  return {
+    current: buildCalendarWindow(cutoffMonthIndex - months, months),
+    previous: buildCalendarWindow(cutoffMonthIndex - 2 * months, months),
+  };
+}
+
+/** Rows whose month starts inside `[start, end)`. */
+export function itemsWithin<T extends { date: number }>(
   items: T[],
-  months: number | null,
-): WindowSlice<T> {
-  if (months === null) return { current: items, previous: null };
-  const current = items.slice(-months);
-  if (items.length < 2 * months) return { current, previous: null };
-  return { current, previous: items.slice(-2 * months, -months) };
+  start: number,
+  end: number,
+): T[] {
+  return items.filter((item) => item.date >= start && item.date < end);
+}
+
+/**
+ * True when the series has rows from `window.start` onwards, i.e. the window
+ * is inside the data history. Months missing inside the history count as
+ * zero; a window that starts before the first row is not comparable.
+ */
+export function isWindowCovered<T extends { date: number }>(
+  items: T[],
+  window: CalendarWindow,
+): boolean {
+  if (items.length === 0) return false;
+  const firstMonth = Math.min(...items.map((item) => toMonthIndex(item.date)));
+  return toMonthIndex(window.start) >= firstMonth;
 }
 
 export function sumBy<T>(items: T[], extract: (i: T) => number): number {

@@ -1,5 +1,12 @@
 # @anticapture/relayer
 
+## 1.3.3
+
+### Patch Changes
+
+- Updated dependencies [[`1422ca6`](https://github.com/blockful/anticapture/commit/1422ca6d8ee92fdd1b4a439390c5a7bc3889d83a)]:
+  - @anticapture/client@2.2.1
+
 ## 1.3.2
 
 ### Patch Changes

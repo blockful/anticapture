@@ -1,5 +1,11 @@
 # @anticapture/client
 
+## 2.2.1
+
+### Patch Changes
+
+- [#2145](https://github.com/blockful/anticapture/pull/2145) [`1422ca6`](https://github.com/blockful/anticapture/commit/1422ca6d8ee92fdd1b4a439390c5a7bc3889d83a) Thanks [@brunod-e](https://github.com/brunod-e)! - Send array query params as repeated params from the MCP server so filters are applied.
+
 ## 2.2.0
 
 ### Minor Changes

@@ -1,5 +1,24 @@
 # @anticapture/dashboard
 
+## 2.17.3
+
+### Patch Changes
+
+- [#2172](https://github.com/blockful/anticapture/pull/2172) [`0a34066`](https://github.com/blockful/anticapture/commit/0a34066e7be690fb67d61cbbd4ea84490b92dd25) Thanks [@alextnetto](https://github.com/alextnetto)! - Simplify the gasless vote banner to "This vote is free!" without the remaining count.
+
+- [#2173](https://github.com/blockful/anticapture/pull/2173) [`a7e1e5b`](https://github.com/blockful/anticapture/commit/a7e1e5b25c70d224a61bc277d62da16a585709c8) Thanks [@alextnetto](https://github.com/alextnetto)! - Fix spacing in the proposal votes table: long voter names truncate instead of pushing the copy button into the Choice column, and the transaction link gets right padding instead of being clipped at the table edge.
+
+- Updated dependencies [[`1422ca6`](https://github.com/blockful/anticapture/commit/1422ca6d8ee92fdd1b4a439390c5a7bc3889d83a)]:
+  - @anticapture/client@2.2.1
+
+## 2.17.2
+
+### Patch Changes
+
+- [#2182](https://github.com/blockful/anticapture/pull/2182) [`b523f87`](https://github.com/blockful/anticapture/commit/b523f877a3fe6b00a91a9266929a79850c7882e2) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue tooltips now describe the new ENS revenue queries (v1 controllers plus ENSv2, hourly ETH price, registrants instead of transaction senders, grace-period top-ups excluded from the renewal rate) and spell out each metric's formula, including the arithmetic behind the run rate. The "All Time Revenue by Stream" chart gains a methodology tooltip.
+
+- [#2181](https://github.com/blockful/anticapture/pull/2181) [`a5f4061`](https://github.com/blockful/anticapture/commit/a5f4061952ccf013d916fdc1631f6feffdf81343) Thanks [@alextnetto](https://github.com/alextnetto)! - Revenue: the page keeps showing the API's last good copy when a Dune refresh fails, a KPI with no value no longer shows a change, and the data-age metric is reported only by replicas that served the query in the last hour.
+
 ## 2.17.1
 
 ### Patch Changes

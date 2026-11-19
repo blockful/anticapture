@@ -10,26 +10,57 @@ import {
   redactUrl,
 } from "@/lib/upstream-error";
 import { logger } from "@/logger";
+import { recordRevenueDataAsOf, recordRevenueDataServed } from "@/metrics";
 
 import { RevenueCache, REVENUE_STALE_TTL_MS } from "./cache";
 import { DUNE_MONTH_REGEX, isValidDuneMonth, parseDuneMonth } from "./utils";
 
 /**
+ * When the execution behind a result finished, which is how old its rows are.
+ * Dune sends nanoseconds; this keeps milliseconds in ISO-8601 UTC. A missing
+ * or unreadable value leaves the age unknown instead of rejecting good rows.
+ */
+const duneExecutionEndedAt = z.iso
+  .datetime({ offset: true })
+  .nullish()
+  .catch((ctx) => {
+    logger.warn(
+      { value: ctx.value },
+      "ignoring unreadable Dune execution_ended_at",
+    );
+    return null;
+  })
+  .transform((value) => (value == null ? null : new Date(value).toISOString()));
+
+/**
  * Envelope every Dune result endpoint shares, wrapped around the row schema of
  * the query being fetched. Validating the columns here, before anything is
- * cached, is what keeps a renamed or nulled column from being stored for 24h
+ * cached, is what keeps a renamed or nulled column from being stored for the cache TTL
  * and then failing in the mappers on every later request.
  */
 const duneEnvelopeSchema = <Row>(rowSchema: z.ZodType<Row>) =>
   z.object({
+    execution_ended_at: duneExecutionEndedAt,
     result: z.object({
       rows: z.array(rowSchema),
     }),
   });
 
+const revenueMetaSchema = z.object({
+  asOf: z.string().nullable(),
+  degraded: z.boolean(),
+});
+
+/** What the in-flight map and the cache hold: validated rows plus their meta. */
+const revenueRowsSchema = <Row>(rowSchema: z.ZodType<Row>) =>
+  z.object({
+    rows: z.array(rowSchema),
+    meta: revenueMetaSchema,
+  });
+
 /**
  * Month columns are parsed by `parseDuneMonth`, so validate the exact format it
- * accepts. A format change would otherwise pass validation, be cached for 24h,
+ * accepts. A format change would otherwise pass validation, be cached for the TTL,
  * and throw in the mapper on every later request.
  */
 const duneMonth = z
@@ -95,11 +126,34 @@ export type RevenueQueryKey = (typeof REVENUE_QUERY_KEYS)[number];
 
 export type RevenueDuneUrls = Record<RevenueQueryKey, string>;
 
-export type DuneRowsResponse<T> = {
-  result: {
-    rows: T[];
-  };
+/**
+ * How fresh a revenue answer is. `asOf` is Dune's `execution_ended_at` for the
+ * rows served, null when unknown or when nothing could be served. `degraded`
+ * is true when the rows are a stale copy or the empty fallback served after a
+ * Dune failure, or when no Dune client is configured.
+ */
+export type RevenueMeta = {
+  asOf: string | null;
+  degraded: boolean;
 };
+
+/** Validated rows of one Dune query and how fresh they are. */
+export type RevenueRows<T> = {
+  rows: T[];
+  meta: RevenueMeta;
+};
+
+/** Mapped items of one revenue series and how fresh they are. */
+export type RevenueSeries<T> = {
+  items: T[];
+  meta: RevenueMeta;
+};
+
+/** Nothing to serve and no time to report: an empty, degraded answer. */
+const emptyRows = <T>(): RevenueRows<T> => ({
+  rows: [],
+  meta: { asOf: null, degraded: true },
+});
 
 export type RevenueActionCategory = (typeof ACTION_CATEGORIES)[number];
 
@@ -215,7 +269,7 @@ export class RevenueDuneClient {
   private readonly emptyUntil = new Map<string, number>();
   private readonly inFlight = new Map<
     RevenueQueryKey,
-    Promise<DuneRowsResponse<unknown>>
+    Promise<RevenueRows<unknown>>
   >();
 
   constructor(
@@ -223,9 +277,9 @@ export class RevenueDuneClient {
     private readonly urls: RevenueDuneUrls,
   ) {}
 
-  public async fetchActions(): Promise<RevenueActionItem[]> {
-    const data = await this.fetchJson("actions", RawActionRowSchema);
-    return data.result.rows.flatMap((row) => {
+  public async fetchActions(): Promise<RevenueSeries<RevenueActionItem>> {
+    const { rows, meta } = await this.fetchJson("actions", RawActionRowSchema);
+    const items = rows.flatMap((row) => {
       const category = knownLabel(row.category, ACTION_CATEGORIES, "category");
       if (!category) return [];
       return [
@@ -236,46 +290,64 @@ export class RevenueDuneClient {
         },
       ];
     });
+    return { items, meta };
   }
 
-  public async fetchActiveNames(): Promise<RevenueActiveNamesItem[]> {
-    const data = await this.fetchJson("activeNames", RawActiveNamesRowSchema);
-    return data.result.rows.map((row) => ({
+  public async fetchActiveNames(): Promise<
+    RevenueSeries<RevenueActiveNamesItem>
+  > {
+    const { rows, meta } = await this.fetchJson(
+      "activeNames",
+      RawActiveNamesRowSchema,
+    );
+    const items = rows.map((row) => ({
       date: parseDuneMonth(row.month),
       netChange: row.net_change ?? 0,
       cumulativeActive: row.cumulative_active ?? 0,
     }));
+    return { items, meta };
   }
 
-  public async fetchNewWallets(): Promise<RevenueNewWalletsItem[]> {
-    const data = await this.fetchJson("newWallets", RawNewWalletsRowSchema);
-    return data.result.rows.map((row) => ({
+  public async fetchNewWallets(): Promise<
+    RevenueSeries<RevenueNewWalletsItem>
+  > {
+    const { rows, meta } = await this.fetchJson(
+      "newWallets",
+      RawNewWalletsRowSchema,
+    );
+    const items = rows.map((row) => ({
       date: parseDuneMonth(row.month),
       newWallets: row.new_wallets ?? 0,
       cumulativeWallets: row.cumulative_wallets ?? 0,
     }));
+    return { items, meta };
   }
 
-  public async fetchRenewalFunnel(): Promise<RevenueRenewalFunnelItem[]> {
-    const data = await this.fetchJson(
+  public async fetchRenewalFunnel(): Promise<
+    RevenueSeries<RevenueRenewalFunnelItem>
+  > {
+    const { rows, meta } = await this.fetchJson(
       "renewalFunnel",
       RawRenewalFunnelRowSchema,
     );
-    return data.result.rows.map((row) => ({
+    const items = rows.map((row) => ({
       date: parseDuneMonth(row.expiry_month),
       termsExpiring: row.terms_expiring ?? 0,
       renewedCount: row.renewed_count ?? 0,
       churnedCount: row.churned_count ?? 0,
       renewalRatePct: row.renewal_rate_pct ?? 0,
     }));
+    return { items, meta };
   }
 
-  public async fetchRenewalTenure(): Promise<RevenueRenewalTenureItem[]> {
-    const data = await this.fetchJson(
+  public async fetchRenewalTenure(): Promise<
+    RevenueSeries<RevenueRenewalTenureItem>
+  > {
+    const { rows, meta } = await this.fetchJson(
       "renewalTenure",
       RawRenewalTenureRowSchema,
     );
-    return data.result.rows.flatMap((row) => {
+    const items = rows.flatMap((row) => {
       const tenureBucket = knownLabel(
         row.tenure_bucket,
         TENURE_BUCKETS,
@@ -291,14 +363,17 @@ export class RevenueDuneClient {
         },
       ];
     });
+    return { items, meta };
   }
 
-  public async fetchRevenueByCategory(): Promise<RevenueByCategoryItem[]> {
-    const data = await this.fetchJson(
+  public async fetchRevenueByCategory(): Promise<
+    RevenueSeries<RevenueByCategoryItem>
+  > {
+    const { rows, meta } = await this.fetchJson(
       "revenueByCategory",
       RawRevenueByCategoryRowSchema,
     );
-    return data.result.rows.flatMap((row) => {
+    const items = rows.flatMap((row) => {
       const category = knownLabel(row.category, REVENUE_CATEGORIES, "category");
       if (!category) return [];
       return [
@@ -310,14 +385,15 @@ export class RevenueDuneClient {
         },
       ];
     });
+    return { items, meta };
   }
 
-  public async fetchRevenueTotals(): Promise<RevenueTotalsItem[]> {
-    const data = await this.fetchJson(
+  public async fetchRevenueTotals(): Promise<RevenueSeries<RevenueTotalsItem>> {
+    const { rows, meta } = await this.fetchJson(
       "revenueTotals",
       RawRevenueTotalsRowSchema,
     );
-    return data.result.rows.map((row) => ({
+    const items = rows.map((row) => ({
       date: parseDuneMonth(row.month),
       registrationUsd: row.registration_usd ?? 0,
       premiumUsd: row.premium_usd ?? 0,
@@ -327,21 +403,23 @@ export class RevenueDuneClient {
       premiumEth: row.premium_eth ?? 0,
       renewalEth: row.renewal_eth ?? 0,
     }));
+    return { items, meta };
   }
 
   /**
-   * Fetches a Dune result set, caching it for 24h. When Dune is unhealthy the
+   * Fetches a Dune result set, caching it for REVENUE_CACHE_TTL_MS (6h). When Dune is unhealthy the
    * last known result is served stale, or an empty result set when there is
-   * none. Revenue is third-party data: an outage there must never surface as a
-   * 5xx, because the gateway counts 5xx against the whole DAO's circuit
-   * breaker. A Dune rejection, such as a deleted query id, is our
-   * misconfiguration and is not degraded away.
+   * none, and the answer's meta says so. Revenue is third-party data: an
+   * outage there must never surface as a 5xx, because the gateway counts 5xx
+   * against the whole DAO's circuit breaker. A Dune rejection, such as a bad
+   * API key, is our misconfiguration and is not degraded away.
    */
   protected async fetchJson<Row>(
     key: RevenueQueryKey,
     rowSchema: z.ZodType<Row>,
-  ): Promise<DuneRowsResponse<Row>> {
-    const cached = this.cache.get<DuneRowsResponse<Row>>(key);
+  ): Promise<RevenueRows<Row>> {
+    recordRevenueDataServed(key);
+    const cached = this.cache.get<RevenueRows<Row>>(key);
     if (cached !== null) {
       logger.debug({ key }, "revenue cache hit");
       return cached;
@@ -355,7 +433,7 @@ export class RevenueDuneClient {
       // Re-validated rather than cast: the promise is shared between callers,
       // so the map cannot carry each caller's row type. Every caller for a key
       // passes the same schema, so this parse is a formality that stays honest.
-      const shared = duneEnvelopeSchema(rowSchema).safeParse(await existing);
+      const shared = revenueRowsSchema(rowSchema).safeParse(await existing);
       if (!shared.success) {
         throw new UpstreamUnavailableError(
           "dune",
@@ -378,7 +456,7 @@ export class RevenueDuneClient {
   private async fetchAndCache<Row>(
     key: RevenueQueryKey,
     rowSchema: z.ZodType<Row>,
-  ): Promise<DuneRowsResponse<Row>> {
+  ): Promise<RevenueRows<Row>> {
     const url = this.urls[key];
     // An outage with nothing stale to serve must not be re-probed by every
     // request: seven revenue queries at the 15 s provider deadline would hang
@@ -388,7 +466,7 @@ export class RevenueDuneClient {
     // counts probes, not responses, which is enough for the alert to fire.
     const emptyUntil = this.emptyUntil.get(key);
     if (emptyUntil !== undefined && Date.now() < emptyUntil) {
-      return { result: { rows: [] } };
+      return emptyRows();
     }
     const start = Date.now();
     logger.info(
@@ -396,7 +474,7 @@ export class RevenueDuneClient {
       "fetching revenue data from Dune",
     );
 
-    let data: DuneRowsResponse<Row>;
+    let data: RevenueRows<Row>;
     let status: number;
     try {
       ({ data, status } = await this.requestRows(url, rowSchema));
@@ -412,7 +490,7 @@ export class RevenueDuneClient {
         },
         "failed to fetch revenue data from Dune",
       );
-      const stale = this.cache.getStale<DuneRowsResponse<Row>>(key);
+      const stale = this.cache.getStale<RevenueRows<Row>>(key);
       recordDegradedUpstream({
         upstream: error.upstream,
         resource: `revenue_${key}`,
@@ -430,20 +508,28 @@ export class RevenueDuneClient {
         if (!unreadableBody) {
           this.emptyUntil.set(key, Date.now() + REVENUE_STALE_TTL_MS);
         }
-        return { result: { rows: [] } };
+        return emptyRows();
       }
       // Lease the stale value briefly so the outage is not re-probed by every
-      // single request, while still refreshing soon after Dune recovers.
-      this.cache.set(key, stale, REVENUE_STALE_TTL_MS);
-      return stale;
+      // single request, while still refreshing soon after Dune recovers. The
+      // copy keeps the asOf of the execution that produced it, and the lease
+      // is marked degraded so the requests it answers are not cached as fresh.
+      const degraded: RevenueRows<Row> = {
+        rows: stale.rows,
+        meta: { asOf: stale.meta.asOf, degraded: true },
+      };
+      this.cache.set(key, degraded, REVENUE_STALE_TTL_MS);
+      return degraded;
     }
 
     this.cache.set(key, data);
+    recordRevenueDataAsOf(key, data.meta.asOf);
     logger.info(
       {
         key,
         status,
-        rowCount: data.result.rows.length,
+        rowCount: data.rows.length,
+        asOf: data.meta.asOf,
         durationMs: Date.now() - start,
       },
       "revenue fetch succeeded",
@@ -454,14 +540,14 @@ export class RevenueDuneClient {
   /**
    * Calls one Dune result endpoint and validates the rows against the schema
    * of that query, before the caller can cache them. Transport failures,
-   * timeouts, retryable statuses, invalid JSON and a shape mismatch mean Dune
-   * is unhealthy. A rejection such as a bad API key or an unknown query id is
-   * our problem and surfaces as a 502 instead of degrading silently.
+   * timeouts, retryable statuses, a 404, a 402, invalid JSON and a shape
+   * mismatch degrade. A rejection such as a bad API key is our problem and
+   * surfaces as a 502 instead of degrading silently.
    */
   private async requestRows<Row>(
     url: string,
     rowSchema: z.ZodType<Row>,
-  ): Promise<{ data: DuneRowsResponse<Row>; status: number }> {
+  ): Promise<{ data: RevenueRows<Row>; status: number }> {
     let response: Response;
     try {
       response = await fetch(url, {
@@ -477,17 +563,32 @@ export class RevenueDuneClient {
     }
 
     if (!response.ok) {
-      // A 404 on a results endpoint means that query id no longer resolves.
-      // The renewal-tenure query does this persistently, and turning it into a
-      // 502 would leave the route 5xx-ing, which is exactly what the empty
-      // fallback exists to avoid. It degrades, but under its own reason so
-      // operators can tell a dead query from a passing outage. A 401 or 403
-      // stays loud: a bad key is fixed by us, not by waiting.
+      // A 404 on a results endpoint means the query has no completed
+      // execution for its latest version (it was edited and never re-run, or
+      // never run at all), or its last result expired. The query id is fine;
+      // it needs a re-run on Dune, which no waiting here will do. Turning it
+      // into a 502 would leave the route 5xx-ing, which is exactly what the
+      // stale and empty fallbacks exist to avoid, so it degrades, under its
+      // own reason so operators can tell it from a passing outage.
       if (response.status === 404) {
         throw new UpstreamUnavailableError(
           "dune",
           `HTTP 404: ${response.statusText}`,
           { reason: "not_found" },
+        );
+      }
+      // A 402 is Dune refusing to serve results under the account's billing
+      // limits (no credits, or the datapoint cap for the cycle). Like the 404
+      // it will not clear by waiting, and like it a 502 would trip the gateway
+      // breaker for the whole DAO, so it degrades under its own reason. This
+      // stays local to revenue: the shared status check still rejects a 402
+      // for every other provider. A 401 or 403 stays loud: a bad key is fixed
+      // by us, not by waiting.
+      if (response.status === 402) {
+        throw new UpstreamUnavailableError(
+          "dune",
+          `HTTP 402: ${response.statusText}`,
+          { reason: "payment_required" },
         );
       }
       if (!isDegradableUpstreamStatus(response.status)) {
@@ -519,6 +620,12 @@ export class RevenueDuneClient {
       );
     }
 
-    return { data: envelope.data, status: response.status };
+    return {
+      data: {
+        rows: envelope.data.result.rows,
+        meta: { asOf: envelope.data.execution_ended_at, degraded: false },
+      },
+      status: response.status,
+    };
   }
 }
