@@ -270,31 +270,6 @@ export function transformToMonthlySeries(items: RevenueTotalsItem[]) {
 // Two stacked series (gain + loss) coexist so the legend keeps separate
 // green/red swatches. Only one is non-zero at any given month, so stacking
 // preserves a single full-width bar per point.
-export type ActiveNamesHeadline = {
-  /** Names inside a paid term at some point in the latest month. */
-  active: number;
-  /**
-   * Names still registered on chain in that month, when the API reports it
-   * and it differs from `active` (it does from October 2026, when ENSv2 gave
-   * every v1 name 62 free days). Null otherwise.
-   */
-  onchain: number | null;
-};
-
-/** The latest month's counts, whatever order the rows come in. */
-export function summarizeActiveNames(
-  items: RevenueActiveNamesItem[],
-): ActiveNamesHeadline | null {
-  if (items.length === 0) return null;
-  const latest = items.reduce((a, b) => (b.date > a.date ? b : a));
-  const onchain = latest.cumulativeOnchain ?? null;
-  return {
-    active: latest.cumulativeActive,
-    onchain:
-      onchain !== null && onchain !== latest.cumulativeActive ? onchain : null,
-  };
-}
-
 export function transformToNameGrowth(items: RevenueActiveNamesItem[]) {
   return {
     xAxisLabels: items.map((i) => formatMonthLabel(i.date)),

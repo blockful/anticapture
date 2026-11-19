@@ -16,10 +16,7 @@ import {
 } from "@/features/revenue/utils/format";
 import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
 import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
-import {
-  summarizeActiveNames,
-  transformToNameGrowth,
-} from "@/features/revenue/utils/transform";
+import { transformToNameGrowth } from "@/features/revenue/utils/transform";
 
 export const NameGrowthChart = () => {
   const activeNamesQuery = useGetRevenueActiveNames("ens");
@@ -39,10 +36,10 @@ export const NameGrowthChart = () => {
     () => (isLoading || isUnavailable ? null : transformToNameGrowth(items)),
     [isLoading, isUnavailable, items],
   );
-  const headline = useMemo(
-    () => (isUnavailable ? null : summarizeActiveNames(items)),
-    [isUnavailable, items],
-  );
+  const activeNamesCount =
+    isUnavailable || items.length === 0
+      ? null
+      : items[items.length - 1].cumulativeActive;
 
   return (
     <Card className="p-4">
@@ -54,28 +51,19 @@ export const NameGrowthChart = () => {
           {paragraphs(
             `Active names are .eth names inside a registration term that was paid for, at some point in the month. The headline is the latest month, ${latestMonthText.replace(/^in /, "")}.`,
             `Formula: each registration adds ${code("+1")} in the month it starts and ${code("−1")} in the month after its paid term ends. Bars are the net change of the month; the line is the running total.`,
-            `ENSv2 gave every v1 name 62 extra days on chain for free: ${code("ENSv2 expiry = paid term end + 62 days")}. They are not a paid term and are not counted here, so months stay comparable. The second figure counts them: names still registered on chain.`,
+            `ENSv2 gave every v1 name 62 extra days on chain for free: ${code("ENSv2 expiry = paid term end + 62 days")}. They are not a paid term and are not counted here, so months stay comparable.`,
             "Renewing within the grace period continues the same registration. Names count from their first registrar-controller event (May 2019 onward).",
           )}
         </InfoTooltip>
       </div>
       {!isLoading && (
         <p className="text-secondary mt-0.5 text-sm">
-          {headline ? (
+          {activeNamesCount !== null ? (
             <>
               <span className="font-medium" style={{ color: "#0080bc" }}>
-                {formatCompact(headline.active)}
+                {formatCompact(activeNamesCount)}
               </span>{" "}
               active names {latestMonthText}
-              {headline.onchain !== null && (
-                <>
-                  {" · "}
-                  <span className="text-primary font-medium">
-                    {formatCompact(headline.onchain)}
-                  </span>{" "}
-                  still registered on chain, counting the 62 days ENSv2 added
-                </>
-              )}
             </>
           ) : (
             <>{UNAVAILABLE_TEXT}: up-to-date active names are not available</>
