@@ -1,5 +1,16 @@
 # @anticapture/dashboard
 
+## 2.17.3
+
+### Patch Changes
+
+- [#2172](https://github.com/blockful/anticapture/pull/2172) [`0a34066`](https://github.com/blockful/anticapture/commit/0a34066e7be690fb67d61cbbd4ea84490b92dd25) Thanks [@alextnetto](https://github.com/alextnetto)! - Simplify the gasless vote banner to "This vote is free!" without the remaining count.
+
+- [#2173](https://github.com/blockful/anticapture/pull/2173) [`a7e1e5b`](https://github.com/blockful/anticapture/commit/a7e1e5b25c70d224a61bc277d62da16a585709c8) Thanks [@alextnetto](https://github.com/alextnetto)! - Fix spacing in the proposal votes table: long voter names truncate instead of pushing the copy button into the Choice column, and the transaction link gets right padding instead of being clipped at the table edge.
+
+- Updated dependencies [[`1422ca6`](https://github.com/blockful/anticapture/commit/1422ca6d8ee92fdd1b4a439390c5a7bc3889d83a)]:
+  - @anticapture/client@2.2.1
+
 ## 2.17.2
 
 ### Patch Changes
