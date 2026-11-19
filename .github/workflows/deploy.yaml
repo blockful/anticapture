@@ -86,6 +86,10 @@ jobs:
           EXPECTED_GATEFUL_SHA: ${{ github.sha }}
           STALE_UPSTREAM_SHAS: ${{ steps.upstreams.outputs.stale }}
           STALE_GATEFUL_SHAS: ${{ steps.upstreams.outputs.stale-gateful }}
+          # Upstreams allowed to be down without blocking the release, as
+          # gateful's /health names them (e.g. "scr"). Set the repository
+          # variable while a DAO re-indexes from scratch; clear it afterwards.
+          GATEFUL_TOLERATED_DOWN_UPSTREAMS: ${{ vars.GATEFUL_TOLERATED_DOWN_UPSTREAMS }}
 
       - name: Deploy to Vercel
         env:
