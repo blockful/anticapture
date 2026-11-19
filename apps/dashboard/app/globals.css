@@ -638,7 +638,20 @@
     @apply text-[20px] leading-[28px] tracking-[-0.5%];
   } */
 
+  /*
+    Native scrollbars follow the theme: a dimmed thumb on a transparent track.
+    Without this the browser draws its light scrollbar (white track) over the
+    dark app whenever the OS shows classic scrollbars. Repeated on `.dark` so
+    the variable resolves again inside a dark subtree of a light page.
+  */
+  html,
   .dark {
+    scrollbar-color: var(--base-dimmed) transparent;
+  }
+
+  .dark {
+    /* Native controls (scrollbars, form widgets) render in their dark style. */
+    color-scheme: dark;
     --base-background: #09090b;
     --base-foreground: #fafafa;
     --base-muted: #27272a;
