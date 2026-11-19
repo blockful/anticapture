@@ -7,6 +7,7 @@ import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { ComboChart } from "@/shared/components/design-system/charts/combo-chart/ComboChart";
 
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { formatCompact } from "@/features/revenue/utils/format";
@@ -28,11 +29,10 @@ export const NewUsersChart = () => {
           New .eth Registrants
         </p>
         <InfoTooltip>
-          New registrants: each address is counted once, in the month it first
-          becomes the owner of a newly registered .eth name (first paid
-          registration on the v1 ETH registrar controllers, from May 2019, or on
-          ENSv2). Renewals do not add wallets. The cumulative line counts every
-          registrant seen so far.
+          {paragraphs(
+            "New registrants: each address is counted once, in the month it first becomes the owner of a newly registered .eth name (first paid registration on the v1 ETH registrar controllers, from May 2019, or on ENSv2). Renewals do not add wallets.",
+            `Formula: bars = ${code("addresses whose first registration is in that month")}; line = ${code("running total of the bars")}`,
+          )}
         </InfoTooltip>
       </div>
       {isLoading ? (

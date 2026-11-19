@@ -20,18 +20,18 @@ import { RevenueCache } from "./cache";
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
-  RevenueDuneUrls,
   RevenueQueryKey,
 } from "./dune-client";
 
 const API_KEY = "test-revenue-dune-api-key";
 
-function buildUrls(
-  base = "https://api.dune.com/api/v1/query",
-): RevenueDuneUrls {
-  return REVENUE_QUERY_KEYS.reduce<RevenueDuneUrls>(
+/** Every query configured, including the optional ones. */
+type AllRevenueUrls = Record<RevenueQueryKey, string>;
+
+function buildUrls(base = "https://api.dune.com/api/v1/query"): AllRevenueUrls {
+  return REVENUE_QUERY_KEYS.reduce<AllRevenueUrls>(
     (acc, key, idx) => ({ ...acc, [key]: `${base}/${idx}/results` }),
-    {} as RevenueDuneUrls,
+    {} as AllRevenueUrls,
   );
 }
 
@@ -70,7 +70,7 @@ afterEach(() => {
 afterAll(() => server.close());
 
 describe("RevenueDuneClient", () => {
-  let urls: RevenueDuneUrls;
+  let urls: AllRevenueUrls;
   let client: TestableRevenueDuneClient;
 
   beforeEach(() => {
@@ -279,6 +279,85 @@ describe("RevenueDuneClient", () => {
     expect(result.items).toEqual([
       { date: 1767225600, category: "Renewal", actions: 0 },
     ]);
+  });
+
+  describe("fetchEnsv2Daily", () => {
+    const row = {
+      day: "2026-10-28 00:00:00.000 UTC",
+      registration_usd: 8573.69,
+      premium_usd: 0,
+      renewal_usd: 11808.69,
+      total_usd: 20382.38,
+      cumulative_usd: 35353.33,
+      registrations: 399,
+      renewals: 1693,
+      renewals_unmigrated: 1600,
+      names_migrated: 10425,
+      cumulative_migrated: 14449,
+      reserved_names: 919728,
+      migrated_pct: 1.571,
+    };
+
+    it("maps one row per day, keyed by the day's UTC start", async () => {
+      server.use(
+        http.get(urls.ensv2Daily, () =>
+          HttpResponse.json({ result: { rows: [row] } }),
+        ),
+      );
+
+      const result = await client.fetchEnsv2Daily();
+
+      expect(result.items).toEqual([
+        {
+          date: Date.UTC(2026, 9, 28) / 1000,
+          registrationUsd: 8573.69,
+          premiumUsd: 0,
+          renewalUsd: 11808.69,
+          totalUsd: 20382.38,
+          cumulativeUsd: 35353.33,
+          registrations: 399,
+          renewals: 1693,
+          renewalsUnmigrated: 1600,
+          namesMigrated: 10425,
+          cumulativeMigrated: 14449,
+          reservedNames: 919728,
+          migratedPct: 1.571,
+        },
+      ]);
+      expect(result.meta.degraded).toBe(false);
+    });
+
+    it("degrades when a column of the query is missing", async () => {
+      const { reserved_names: _dropped, ...withoutDenominator } = row;
+      server.use(
+        http.get(urls.ensv2Daily, () =>
+          HttpResponse.json({ result: { rows: [withoutDenominator] } }),
+        ),
+      );
+
+      await expect(client.fetchEnsv2Daily()).resolves.toEqual({
+        items: [],
+        meta: { asOf: null, degraded: true },
+      });
+    });
+
+    it("answers empty and degraded, without calling Dune, when its query ID is not set", async () => {
+      let hits = 0;
+      server.use(
+        http.get(urls.ensv2Daily, () => {
+          hits += 1;
+          return HttpResponse.json({ result: { rows: [row] } });
+        }),
+      );
+      const { ensv2Daily: _unset, ...required } = urls;
+      const unconfigured = new RevenueDuneClient(API_KEY, required);
+
+      await expect(unconfigured.fetchEnsv2Daily()).resolves.toEqual({
+        items: [],
+        meta: { asOf: null, degraded: true },
+      });
+      expect(hits).toBe(0);
+    });
   });
 
   it("accepts numeric columns Dune serialised as text", async () => {

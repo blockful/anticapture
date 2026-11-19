@@ -9,10 +9,14 @@ import { SegmentedControl } from "@/shared/components/design-system/segmented-co
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { cn } from "@/shared/utils/cn";
 
-import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import {
+  InfoTooltip,
+  TooltipBody,
+} from "@/features/revenue/components/InfoTooltip";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import type { RevenueTimeframe } from "@/features/revenue/types";
 import { REVENUE_BASIS } from "@/features/revenue/utils/copy";
+import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import { UNAVAILABLE_TEXT } from "@/features/revenue/utils/meta";
 import { computeRevenueSummary } from "@/features/revenue/utils/transform";
 
@@ -51,10 +55,12 @@ export const RevenueSummaryCard = () => {
                 Protocol Revenue (actual)
               </p>
               <InfoTooltip>
-                Sum of the monthly protocol revenue in the selected period
-                {summary ? ` (${summary.actualPeriod})` : ""}. 1Y is the last 12
-                full months before the data cutoff; YTD and MAX run up to the
-                cutoff, so their latest month is partial. {REVENUE_BASIS}
+                {paragraphs(
+                  `Protocol revenue in the selected period${summary ? ` (${summary.actualPeriod})` : ""}.`,
+                  `Formula: ${code("sum of monthly revenue in the period")}`,
+                  "1Y is the last 12 full months before the data cutoff. YTD and MAX run up to the cutoff, so their latest month is partial.",
+                  REVENUE_BASIS,
+                )}
               </InfoTooltip>
             </div>
             <SegmentedControl
@@ -102,11 +108,13 @@ export const RevenueSummaryCard = () => {
               Annualized run rate
             </p>
             <InfoTooltip>
-              Average daily protocol revenue in the last 3 full months covered
-              by the data
-              {summary ? ` (${summary.runRatePeriod})` : ""}, multiplied by 365
-              {summary ? `: ${summary.runRateFormula}` : ""}. {REVENUE_BASIS} A
-              run rate annualizes recent revenue; it is not a forecast.
+              {paragraphs(
+                `Average daily protocol revenue in the last 3 full months covered by the data${summary ? ` (${summary.runRatePeriod})` : ""}, multiplied by 365.`,
+                `Formula: ${code("revenue of the 3 months ÷ days in them × 365")}`,
+                summary && code(summary.runRateFormula),
+                REVENUE_BASIS,
+                "A run rate annualizes recent revenue; it is not a forecast.",
+              )}
             </InfoTooltip>
           </div>
           {isLoading ? (
@@ -127,14 +135,14 @@ export const RevenueSummaryCard = () => {
                 <Tooltip
                   asChild
                   tooltipContent={
-                    <p className="text-secondary text-left text-sm font-normal leading-5">
-                      Change in average daily revenue vs the previous 3 full
-                      months ({summary.qoqDelta.previousPeriod})
-                      {summary.qoqDelta.formula
-                        ? `: ${summary.qoqDelta.formula}`
-                        : ""}
-                      .
-                    </p>
+                    <TooltipBody>
+                      {paragraphs(
+                        `Change in average daily revenue against the previous 3 full months (${summary.qoqDelta.previousPeriod}).`,
+                        `Formula: ${code("(daily average ÷ previous daily average − 1) × 100")}`,
+                        summary.qoqDelta.formula &&
+                          code(summary.qoqDelta.formula),
+                      )}
+                    </TooltipBody>
                   }
                   triggerClassName="cursor-help"
                 >

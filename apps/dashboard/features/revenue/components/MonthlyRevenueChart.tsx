@@ -11,6 +11,7 @@ import { UnavailableChart } from "@/features/revenue/components/UnavailableChart
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { REVENUE_BASIS } from "@/features/revenue/utils/copy";
+import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import type { ChartGranularity } from "@/features/revenue/types";
 import { formatMillions } from "@/features/revenue/utils/format";
 import { transformToStreamSeries } from "@/features/revenue/utils/transform";
@@ -62,10 +63,12 @@ export const MonthlyRevenueChart = () => {
             All Time Revenue by Stream
           </p>
           <InfoTooltip>
-            Protocol revenue per month, quarter or year, split into registration
-            base fees, renewals and premiums. Each bar is the sum of the monthly
-            revenue in that period; the latest bar is partial, because it runs
-            only up to the data cutoff. {REVENUE_BASIS}
+            {paragraphs(
+              "Protocol revenue per month, quarter or year, split into registration base fees, renewals and premiums.",
+              `Formula: each bar = ${code("sum of monthly revenue in that period")}`,
+              "The latest bar is partial: it runs only up to the data cutoff.",
+              REVENUE_BASIS,
+            )}
           </InfoTooltip>
         </div>
         <div className="flex items-center gap-2">

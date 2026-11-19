@@ -4,6 +4,7 @@ import {
   RevenueActionsResponseSchema,
   RevenueActiveNamesResponseSchema,
   RevenueByCategoryResponseSchema,
+  RevenueEnsv2DailyResponseSchema,
   RevenueNewWalletsResponseSchema,
   RevenueQuerySchema,
   RevenueRenewalFunnelResponseSchema,
@@ -356,6 +357,50 @@ export function revenue(app: Hono, revenueDuneClient?: RevenueDuneClient) {
         if (byDate !== 0) return sign * byDate;
         return sign * a.tenureBucket.localeCompare(b.tenureBucket);
       });
+
+      return context.json(
+        { items: sorted, totalCount: sorted.length, meta },
+        200,
+        cacheHeadersFor(meta),
+      );
+    },
+  );
+
+  app.openapi(
+    createRoute({
+      method: "get",
+      operationId: "getRevenueEnsv2Daily",
+      path: "/revenue/ensv2-daily",
+      summary: "Get daily ENSv2 revenue and migration progress",
+      description:
+        "One item per UTC day since the ENSv2 launch (2026-10-27): revenue by stream, registrations, renewals, v1 names migrated and the migrated share of the v1 names reserved for migration. The latest day is partial.",
+      tags: ["revenue"],
+      middleware: [ensOnly, setCacheControl(60)],
+      request: {
+        query: RevenueQuerySchema,
+      },
+      responses: {
+        200: {
+          description: "Daily ENSv2 revenue and migration progress",
+          content: {
+            "application/json": {
+              schema: RevenueEnsv2DailyResponseSchema,
+            },
+          },
+        },
+      },
+    }),
+    async (context) => {
+      const { fromDate, toDate, orderDirection } = context.req.valid("query");
+
+      if (!revenueDuneClient) {
+        return context.json(UNCONFIGURED_RESPONSE, 200, DEGRADED_CACHE_HEADERS);
+      }
+
+      const { items, meta } = await revenueDuneClient.fetchEnsv2Daily();
+      const filtered = filterByRange(items, fromDate, toDate);
+      const sign = orderDirection === "desc" ? -1 : 1;
+      const sorted = [...filtered].sort((a, b) => sign * (a.date - b.date));
 
       return context.json(
         { items: sorted, totalCount: sorted.length, meta },

@@ -7,6 +7,7 @@ import { Card } from "@/shared/components/design-system/cards/card/Card";
 import { StackedBarChart } from "@/shared/components/design-system/charts/stacked-bar-chart/StackedBarChart";
 
 import { InfoTooltip } from "@/features/revenue/components/InfoTooltip";
+import { code, paragraphs } from "@/features/revenue/utils/tooltipText";
 import { UnavailableChart } from "@/features/revenue/components/UnavailableChart";
 import { useRevenueDataState } from "@/features/revenue/hooks/useRevenueDataState";
 import { formatCompact } from "@/features/revenue/utils/format";
@@ -40,15 +41,11 @@ export const UpcomingExpirationsChart = () => {
           Upcoming Expirations
         </p>
         <InfoTooltip>
-          .eth names grouped by the month their current registration expires,
-          split by how many times they have been renewed since that registration
-          began. Names registered before ENSv2 (Oct 27, 2026) use their ENSv2
-          expiry, which is their v1 expiry plus 62 days. The headline counts
-          names not renewed since their current registration began and not yet
-          expired at the data cutoff that expire in the 12 calendar months
-          starting with{" "}
-          {cutoffKnown ? "the data cutoff's month" : "the current month"}
-          {series ? ` (${series.next12moPeriod})` : ""}.
+          {paragraphs(
+            ".eth names grouped by the month their current registration expires, split by how many times they have been renewed since that registration began.",
+            `Headline: names not renewed since their current registration began and not yet expired at the data cutoff, that expire in the 12 calendar months starting with ${cutoffKnown ? "the data cutoff's month" : "the current month"}${series ? ` (${series.next12moPeriod})` : ""}.`,
+            `Names registered before ENSv2 (Oct 27, 2026) use their ENSv2 expiry: ${code("ENSv2 expiry = v1 expiry + 62 days")}`,
+          )}
         </InfoTooltip>
       </div>
       {!isLoading && (

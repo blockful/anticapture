@@ -344,3 +344,42 @@ All 81 checks pass:
 - **v1 relies on Dune's decoded controller tables.** The audit verified them as complete (89/89 months replicated).
 - **The Chainlink phase list must be extended if c3 ever uses a new aggregator.** It cannot: c3 was removed as a
   controller at the freeze.
+
+## ENSv2 daily series (`ensv2_daily.sql`)
+
+Dune query 9155159, read by `/revenue/ensv2-daily` through `REVENUE_DUNE_ENSV2_DAILY_QUERY_ID`. The variable is
+optional: without it the route answers empty and degraded and the other revenue routes are unaffected.
+
+One row per UTC day from the ENSv2 launch (block 26,282,117, 2026-10-27 06:01:59 UTC) through today, including days
+with no event. The launch day and the current day are partial.
+
+**Revenue** uses the same events, decoding, pricing and zero-amount filter as the ENSv2 part of `revenue_totals.sql`
+(USDC and DAI at face value, any other token on a paid event fails the query), grouped by day instead of by month.
+
+**Migration** reads the ENSv2 `.eth` registry, ETHRegistry `0xf60aBa43E1F7f3daB1186fF03b561401C9dF85e2`
+(a `PermissionedRegistry`):
+
+| Column                | Definition                                                                                                                                                                                                    |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reserved_names`      | Distinct labels in `LabelReserved` sent by the BatchRegistrar `0xf0Cc…9721`, which reserved every v1 name there between 2026-10-03 and the launch day (last at block 26,282,548). The names that can migrate. |
+| `names_migrated`      | `LabelRegistered` whose `sender` is the UnlockedMigrationController `0xab82…eb64` or the LockedMigrationController `0x3cea…e51a`, one per name, on its first event.                                           |
+| `cumulative_migrated` | Running total of `names_migrated`.                                                                                                                                                                            |
+| `migrated_pct`        | `cumulative_migrated / reserved_names * 100`, 4 decimals.                                                                                                                                                     |
+| `registrations`       | `LabelRegistered` whose `sender` is the ETHRegistrar: names registered on ENSv2, not migrations.                                                                                                              |
+| `renewals`            | Paid `NameRenewed` on the ETHRegistrar and on ETHRenewerV1.                                                                                                                                                   |
+| `renewals_unmigrated` | The ETHRenewerV1 part of `renewals`. It only renews v1 names that have not migrated.                                                                                                                          |
+
+The denominator is fixed: only the BatchRegistrar's reservations count, and it stopped on the launch day. A reserved
+name that expires without migrating stays in it, so `migrated_pct` cannot reach 100. A reserved name that expired and
+was registered again on ENSv2 is a registration, not a migration.
+
+### Acceptance values (run of 2026-11-19 15:50 UTC)
+
+- 24 rows, 2026-10-27 to 2026-11-19.
+- `cumulative_usd` on 2026-10-31 = 55,615.78, the October ENSv2 total of `revenue_totals.sql`.
+- `reserved_names` = 919,728, all sent by the BatchRegistrar.
+- `cumulative_migrated` = 31,310, every one of them a reserved label (checked at 31,308: 31,281 unlocked and 27
+  locked).
+- `registrations` sum to 3,471. At 3,468, 587 were on labels that had been reserved.
+- `renewals` sum to 15,241, of which 14,783 on ETHRenewerV1. No zero-amount payment event exists so far.
+- Cost: 1 to 3 credits per run.
