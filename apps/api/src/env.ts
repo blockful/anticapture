@@ -65,6 +65,9 @@ const envSchema = z
     REVENUE_DUNE_REVENUE_TOTALS_QUERY_ID: duneQueryId.optional(),
     REVENUE_DUNE_REVENUE_BY_CATEGORY_QUERY_ID: duneQueryId.optional(),
     REVENUE_DUNE_RENEWAL_TENURE_QUERY_ID: duneQueryId.optional(),
+    // Optional even when the key is set: without it /revenue/ensv2-daily
+    // answers empty and degraded, and the other revenue routes are unaffected.
+    REVENUE_DUNE_ENSV2_DAILY_QUERY_ID: duneQueryId.optional(),
   })
   .superRefine((data, ctx) => {
     if (CI && !data.DATABASE_PUBLIC_URL) {
@@ -110,6 +113,9 @@ const envSchema = z
         : undefined,
     REVENUE_DUNE_RENEWAL_TENURE_URL: data.REVENUE_DUNE_RENEWAL_TENURE_QUERY_ID
       ? duneQueryUrl(data.REVENUE_DUNE_RENEWAL_TENURE_QUERY_ID)
+      : undefined,
+    REVENUE_DUNE_ENSV2_DAILY_URL: data.REVENUE_DUNE_ENSV2_DAILY_QUERY_ID
+      ? duneQueryUrl(data.REVENUE_DUNE_ENSV2_DAILY_QUERY_ID)
       : undefined,
   }));
 

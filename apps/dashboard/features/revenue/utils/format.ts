@@ -18,6 +18,12 @@ export const formatMonthLabel = (unixSeconds: number): string => {
   return `${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
 };
 
+/** "Oct 27" (UTC). The year is left out: daily axes span months, not years. */
+export const formatDayLabel = (unixSeconds: number): string => {
+  const d = new Date(unixSeconds * 1000);
+  return `${MONTH_ABBR[d.getUTCMonth()]} ${d.getUTCDate()}`;
+};
+
 export const formatQuarterLabel = (unixSeconds: number): string => {
   const d = new Date(unixSeconds * 1000);
   const quarter = Math.floor(d.getUTCMonth() / 3) + 1;
@@ -151,3 +157,15 @@ const usdExactFormatter = new Intl.NumberFormat("en-US", {
 /** Whole-dollar USD without compaction, for showing the arithmetic in tooltips. */
 export const formatUsdExact = (value: number): string =>
   usdExactFormatter.format(value);
+
+const integerFormatter = new Intl.NumberFormat("en-US", {
+  maximumFractionDigits: 0,
+});
+
+/** Whole number with thousands separators, for showing the arithmetic in tooltips. */
+export const formatInteger = (value: number): string =>
+  integerFormatter.format(value);
+
+/** "3.40%". Fixed decimals, so a slowly moving share does not flicker between widths. */
+export const formatPercent = (value: number, decimals = 2): string =>
+  `${value.toFixed(decimals)}%`;

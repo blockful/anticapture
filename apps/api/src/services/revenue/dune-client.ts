@@ -120,11 +120,23 @@ export const REVENUE_QUERY_KEYS = [
   "revenueTotals",
   "revenueByCategory",
   "renewalTenure",
+  "ensv2Daily",
 ] as const;
 
 export type RevenueQueryKey = (typeof REVENUE_QUERY_KEYS)[number];
 
-export type RevenueDuneUrls = Record<RevenueQueryKey, string>;
+/**
+ * Queries added after the first release are optional: a deployment that has
+ * the Dune key but not their ID yet keeps booting and serves them as
+ * unconfigured (empty and degraded) instead of failing every revenue route.
+ */
+export type OptionalRevenueQueryKey = "ensv2Daily";
+
+export type RevenueDuneUrls = Record<
+  Exclude<RevenueQueryKey, OptionalRevenueQueryKey>,
+  string
+> &
+  Partial<Record<OptionalRevenueQueryKey, string>>;
 
 /**
  * How fresh a revenue answer is. `asOf` is Dune's `execution_ended_at` for the
@@ -261,6 +273,39 @@ const RawRevenueTotalsRowSchema = z.object({
   registration_eth: duneNumeric,
   premium_eth: duneNumeric,
   renewal_eth: duneNumeric,
+});
+
+export type RevenueEnsv2DailyItem = {
+  date: number;
+  registrationUsd: number;
+  premiumUsd: number;
+  renewalUsd: number;
+  totalUsd: number;
+  cumulativeUsd: number;
+  registrations: number;
+  renewals: number;
+  renewalsUnmigrated: number;
+  namesMigrated: number;
+  cumulativeMigrated: number;
+  reservedNames: number;
+  migratedPct: number;
+};
+
+/** `day` has the same timestamp format as the monthly queries' `month`. */
+const RawEnsv2DailyRowSchema = z.object({
+  day: duneMonth,
+  registration_usd: duneNumeric,
+  premium_usd: duneNumeric,
+  renewal_usd: duneNumeric,
+  total_usd: duneNumeric,
+  cumulative_usd: duneNumeric,
+  registrations: duneNumeric,
+  renewals: duneNumeric,
+  renewals_unmigrated: duneNumeric,
+  names_migrated: duneNumeric,
+  cumulative_migrated: duneNumeric,
+  reserved_names: duneNumeric,
+  migrated_pct: duneNumeric,
 });
 
 export class RevenueDuneClient {
@@ -407,6 +452,39 @@ export class RevenueDuneClient {
   }
 
   /**
+   * Daily ENSv2 revenue and v1 to ENSv2 migration progress since the ENSv2
+   * launch. Unconfigured (no query ID) is an empty, degraded answer, and is
+   * not counted as an upstream failure.
+   */
+  public async fetchEnsv2Daily(): Promise<
+    RevenueSeries<RevenueEnsv2DailyItem>
+  > {
+    if (!this.urls.ensv2Daily) {
+      return { items: [], meta: { asOf: null, degraded: true } };
+    }
+    const { rows, meta } = await this.fetchJson(
+      "ensv2Daily",
+      RawEnsv2DailyRowSchema,
+    );
+    const items = rows.map((row) => ({
+      date: parseDuneMonth(row.day),
+      registrationUsd: row.registration_usd ?? 0,
+      premiumUsd: row.premium_usd ?? 0,
+      renewalUsd: row.renewal_usd ?? 0,
+      totalUsd: row.total_usd ?? 0,
+      cumulativeUsd: row.cumulative_usd ?? 0,
+      registrations: row.registrations ?? 0,
+      renewals: row.renewals ?? 0,
+      renewalsUnmigrated: row.renewals_unmigrated ?? 0,
+      namesMigrated: row.names_migrated ?? 0,
+      cumulativeMigrated: row.cumulative_migrated ?? 0,
+      reservedNames: row.reserved_names ?? 0,
+      migratedPct: row.migrated_pct ?? 0,
+    }));
+    return { items, meta };
+  }
+
+  /**
    * Fetches a Dune result set, caching it for REVENUE_CACHE_TTL_MS (6h). When Dune is unhealthy the
    * last known result is served stale, or an empty result set when there is
    * none, and the answer's meta says so. Revenue is third-party data: an
@@ -458,6 +536,9 @@ export class RevenueDuneClient {
     rowSchema: z.ZodType<Row>,
   ): Promise<RevenueRows<Row>> {
     const url = this.urls[key];
+    // Only an optional query can lack a URL, and its fetcher answers before
+    // getting here. This keeps the type honest without a cast.
+    if (!url) return emptyRows();
     // An outage with nothing stale to serve must not be re-probed by every
     // request: seven revenue queries at the 15 s provider deadline would hang
     // one page for close to two minutes. The empty answer is leased for the

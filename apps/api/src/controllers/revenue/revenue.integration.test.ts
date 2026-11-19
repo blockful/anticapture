@@ -22,6 +22,7 @@ import { docs } from "@/docs";
 import { env } from "@/env";
 import actionsFixture from "@/services/revenue/__fixtures__/actions.json";
 import activeNamesFixture from "@/services/revenue/__fixtures__/active-names.json";
+import ensv2DailyFixture from "@/services/revenue/__fixtures__/ensv2-daily.json";
 import newWalletsFixture from "@/services/revenue/__fixtures__/new-wallets.json";
 import renewalFunnelFixture from "@/services/revenue/__fixtures__/renewal-funnel.json";
 import renewalTenureFixture from "@/services/revenue/__fixtures__/renewal-tenure.json";
@@ -30,7 +31,6 @@ import revenueTotalsFixture from "@/services/revenue/__fixtures__/revenue-totals
 import {
   REVENUE_QUERY_KEYS,
   RevenueDuneClient,
-  RevenueDuneUrls,
   RevenueQueryKey,
 } from "@/services/revenue/dune-client";
 
@@ -99,6 +99,13 @@ const REVENUE_ENDPOINTS: readonly RevenueEndpointDef[] = [
     operationId: "getRevenueRenewalTenure",
     responseSchemaName: "RevenueRenewalTenureResponse",
   },
+  {
+    path: "/revenue/ensv2-daily",
+    urlKey: "ensv2Daily",
+    fixture: ensv2DailyFixture,
+    operationId: "getRevenueEnsv2Daily",
+    responseSchemaName: "RevenueEnsv2DailyResponse",
+  },
 ];
 
 const API_KEY = "test-api-key";
@@ -117,10 +124,13 @@ type RevenueBody = {
 };
 const FIXTURE_BASE = "https://dune.test";
 
-function buildUrls(base = FIXTURE_BASE): RevenueDuneUrls {
-  return REVENUE_QUERY_KEYS.reduce<RevenueDuneUrls>(
+/** Every query configured, including the optional ones. */
+type AllRevenueUrls = Record<RevenueQueryKey, string>;
+
+function buildUrls(base = FIXTURE_BASE): AllRevenueUrls {
+  return REVENUE_QUERY_KEYS.reduce<AllRevenueUrls>(
     (acc, key, idx) => ({ ...acc, [key]: `${base}/${idx}/results` }),
-    {} as RevenueDuneUrls,
+    {} as AllRevenueUrls,
   );
 }
 
@@ -139,7 +149,7 @@ afterEach(() => {
 afterAll(() => server.close());
 
 describe("Revenue Controller", () => {
-  let urls: RevenueDuneUrls;
+  let urls: AllRevenueUrls;
 
   beforeEach(() => {
     env.DAO_ID = DaoIdEnum.ENS;
@@ -896,6 +906,7 @@ describe("Revenue Controller", () => {
         revenueTotals: 0,
         revenueByCategory: 0,
         renewalTenure: 0,
+        ensv2Daily: 0,
       };
 
       for (const endpoint of REVENUE_ENDPOINTS) {

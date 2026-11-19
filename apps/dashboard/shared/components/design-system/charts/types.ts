@@ -26,19 +26,42 @@ export type ComboChartBarSeries = {
   data: number[];
   color: string;
   stack?: string;
+  /** How this series' value reads in the hover tooltip. Default: the raw number. */
+  valueFormatter?: (value: number) => string;
 };
 
 export type ComboChartLineSeries = {
   name: string;
   data: number[];
   color: string;
+  /** Curved by default. Set false for running totals, where a curve would overshoot the data. */
+  smooth?: boolean;
+  /** How this series' value reads in the hover tooltip. Default: the raw number. */
+  valueFormatter?: (value: number) => string;
+};
+
+/** A dated event drawn as a vertical dashed line at one x-axis category. */
+export type ComboChartMarker = {
+  /** Must equal one of `xAxisLabels`; a marker with no matching label is not drawn. */
+  xLabel: string;
+  label: string;
 };
 
 export type ComboChartProps = {
   barSeries: ComboChartBarSeries[];
   lineSeries: ComboChartLineSeries[];
   xAxisLabels: string[];
+  /** Left axis (bars). Also used for the right axis unless `rightAxisFormatter` is set. */
   yAxisFormatter?: (value: number) => string;
+  /** Right axis (lines), when its unit differs from the bars'. */
+  rightAxisFormatter?: (value: number) => string;
+  /**
+   * Which x-axis labels to print. Default: every label up to 12 categories,
+   * then only the "Jan <year>" ones, printed as the year (monthly series).
+   */
+  xAxisLabelInterval?: number | ((index: number, value: string) => boolean);
+  xAxisLabelFormatter?: (value: string, index: number) => string;
+  markers?: ComboChartMarker[];
   height?: number;
   className?: string;
 };

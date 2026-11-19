@@ -403,6 +403,7 @@ if (env.DAO_ID === DaoIdEnum.ENS) {
       revenueTotals: env.REVENUE_DUNE_REVENUE_TOTALS_URL ?? "",
       revenueByCategory: env.REVENUE_DUNE_REVENUE_BY_CATEGORY_URL ?? "",
       renewalTenure: env.REVENUE_DUNE_RENEWAL_TENURE_URL ?? "",
+      ensv2Daily: env.REVENUE_DUNE_ENSV2_DAILY_URL,
     };
     revenueDuneClient = new RevenueDuneClient(
       env.REVENUE_DUNE_API_KEY,

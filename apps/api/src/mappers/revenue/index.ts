@@ -317,3 +317,84 @@ export const RevenueByCategoryResponseSchema = z
 export type RevenueByCategoryResponse = z.infer<
   typeof RevenueByCategoryResponseSchema
 >;
+
+export const RevenueEnsv2DailyItemSchema = z
+  .object({
+    date: z
+      .number()
+      .int()
+      .describe("Day start (Unix timestamp in seconds, UTC)."),
+    registrationUsd: z
+      .number()
+      .describe(
+        "USD paid as base price for names registered on ENSv2 that day (USDC and DAI at face value).",
+      ),
+    premiumUsd: z
+      .number()
+      .describe(
+        "USD paid as temporary premium on ENSv2 registrations that day.",
+      ),
+    renewalUsd: z
+      .number()
+      .describe(
+        "USD paid for renewals that day, on the ENSv2 registrar and on the v1 renewer used by names that have not migrated.",
+      ),
+    totalUsd: z
+      .number()
+      .describe(
+        "Total ENSv2 revenue for the day (upstream sum; not recomputed).",
+      ),
+    cumulativeUsd: z
+      .number()
+      .describe("Total ENSv2 revenue from the ENSv2 launch through this day."),
+    registrations: z
+      .number()
+      .int()
+      .describe(
+        "Names registered directly on ENSv2 that day. Migrations are not registrations.",
+      ),
+    renewals: z.number().int().describe("Paid renewals that day."),
+    renewalsUnmigrated: z
+      .number()
+      .int()
+      .describe(
+        "Renewals that day made through the v1 renewer, that is, for v1 names that had not migrated.",
+      ),
+    namesMigrated: z
+      .number()
+      .int()
+      .describe("v1 names migrated to ENSv2 that day."),
+    cumulativeMigrated: z
+      .number()
+      .int()
+      .describe("v1 names migrated to ENSv2 from the launch through this day."),
+    reservedNames: z
+      .number()
+      .int()
+      .describe(
+        "v1 names reserved in the ENSv2 registry for migration. Fixed since the launch; the denominator of migratedPct.",
+      ),
+    migratedPct: z
+      .number()
+      .describe(
+        "cumulativeMigrated / reservedNames * 100, rounded to 4 decimals (upstream; not recomputed).",
+      ),
+  })
+  .openapi("RevenueEnsv2DailyItem", {
+    description: "One day of ENSv2 revenue and migration progress.",
+  });
+
+export const RevenueEnsv2DailyResponseSchema = z
+  .object({
+    items: z.array(RevenueEnsv2DailyItemSchema),
+    totalCount: z.number().int().describe("Total number of items returned."),
+    meta: RevenueMetaSchema,
+  })
+  .openapi("RevenueEnsv2DailyResponse", {
+    description:
+      "Daily ENSv2 revenue and v1 to ENSv2 migration progress, one item per UTC day since the ENSv2 launch (2026-10-27). The latest day is partial.",
+  });
+
+export type RevenueEnsv2DailyResponse = z.infer<
+  typeof RevenueEnsv2DailyResponseSchema
+>;
