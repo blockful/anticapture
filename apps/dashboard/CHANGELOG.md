@@ -1,5 +1,11 @@
 # @anticapture/dashboard
 
+## 2.19.1
+
+### Patch Changes
+
+- [#2209](https://github.com/blockful/anticapture/pull/2209) [`0bbdab2`](https://github.com/blockful/anticapture/commit/0bbdab2dc583ddbd8abef0bd225a97c892dd9441) Thanks [@alextnetto](https://github.com/alextnetto)! - The ENSv2 section on ENS revenue follows the rest of the page: a KPI card like Usage & Adoption and two chart cards side by side, in the same colours as the other charts. It drops the renewals figure and the launch marker, and names the migration denominator "eligible v1 names". Name Growth & Churn shows one count again, and Renewal Rate by Expiry Year uses a single colour.
+
 ## 2.19.0
 
 ### Minor Changes
