@@ -5,6 +5,7 @@ import type { Address } from "viem";
 
 import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
 import { useDrawerNavigation } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
 import type { EntityType } from "@/shared/types/entities";
 import { cn } from "@/shared/utils/cn";
@@ -19,8 +20,9 @@ interface DrawerAddressButtonProps {
   addressChars?: number;
 }
 
-// Any address rendered inside the profile drawer is clickable: it re-points the
-// drawer at the profile of the clicked address.
+// Any address rendered inside a profile panel is clickable. Inside the drawer it
+// re-points the drawer at the clicked address; on the profile page, where the
+// same panels render without a drawer around them, it links to that profile.
 export const DrawerAddressButton = ({
   address,
   entityType,
@@ -35,6 +37,16 @@ export const DrawerAddressButton = ({
   // itself covers the ones holding the address in local state.
   const navigation = useDrawerNavigation();
 
+  if (!navigation) {
+    return (
+      <AddressLink
+        address={address}
+        addressChars={addressChars}
+        nameClassName={nameClassName}
+      />
+    );
+  }
+
   return (
     <button
       type="button"
@@ -47,7 +59,7 @@ export const DrawerAddressButton = ({
         setDrawerTab(null);
         setDrawerEntity(entityType, address);
         setDrawerAddress(address);
-        navigation?.repoint(address);
+        navigation.repoint(address);
       }}
     >
       <EnsAvatar

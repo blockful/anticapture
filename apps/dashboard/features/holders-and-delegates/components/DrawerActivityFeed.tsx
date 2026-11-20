@@ -6,6 +6,7 @@ import type {
   FeedEventsQueryParamsRelevanceEnumKey,
 } from "@anticapture/client";
 import { useFeedEventsInfinite } from "@anticapture/client/hooks";
+import { usePathname, useRouter } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
@@ -18,6 +19,7 @@ import { EmptyState } from "@/shared/components/design-system/table/components/E
 import type { DaoIdEnum } from "@/shared/types/daos";
 import type { EntityType } from "@/shared/types/entities";
 import { groupFeedEventsByDate } from "@/shared/utils/groupFeedEventsByDate";
+import { getDaoAddressPath } from "@/shared/utils/whitelabel";
 
 type RelevanceOption = FeedEventsQueryParamsRelevanceEnumKey | "ALL";
 
@@ -105,14 +107,21 @@ export const DrawerActivityFeed = ({
   // `drawerAddress` re-points the owners that read it from the URL; the drawer
   // itself covers the ones holding the address in local state.
   const navigation = useDrawerNavigation();
+  const router = useRouter();
+  const pathname = usePathname();
 
   // Clicking a delegate from a token-holder drawer has to open the delegate
   // profile, so the clicked entity type travels with the clicked address.
   const handleRowClick = (clicked: string, clickedEntityType: EntityType) => {
+    // On the profile page there is no drawer to re-point: open the profile.
+    if (!navigation) {
+      router.push(getDaoAddressPath({ daoId, pathname, address: clicked }));
+      return;
+    }
     setDrawerTab(null);
     setDrawerEntity(clickedEntityType, clicked);
     setDrawerAddress(clicked);
-    navigation?.repoint(clicked);
+    navigation.repoint(clicked);
   };
 
   return (

@@ -1,11 +1,12 @@
 "use client";
 
-import { parseAsString, useQueryState, useQueryStates } from "nuqs";
+import { useQueryState } from "nuqs";
 import { useMemo, useState } from "react";
 
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
 import { DrawerActivityFeed } from "@/features/holders-and-delegates/components/DrawerActivityFeed";
 import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
+import { useResetProfileTabFilters } from "@/features/holders-and-delegates/hooks/useResetProfileTabFilters";
 import type { DrawerNavigation } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
 import { DrawerNavigationContext } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
@@ -141,37 +142,7 @@ export const HoldersAndDelegatesDrawer = ({
   });
 
   // clean up filters when switching tabs
-  const setSortOrder = useQueryState("orderDirection")[1];
-  const setSortBy = useQueryState("orderBy")[1];
-  const setIsFilterActive = useQueryState("active")[1];
-  const setFilterVariables = useQueryStates({
-    minDelta: parseAsString,
-    maxDelta: parseAsString,
-  })[1];
-  const setToFilter = useQueryState("to")[1];
-  const setFromFilter = useQueryState("from")[1];
-  const setSelectedPeriod = useQueryState("selectedPeriod")[1];
-  const setTypeFilter = useQueryState("type")[1];
-  const setTabAddress = useQueryState("tabAddress")[1];
-  const setFeedOrder = useQueryState("feedOrder")[1];
-  const setFeedRelevance = useQueryState("feedRelevance")[1];
-
-  const cleanupFilters = () => {
-    setSortOrder(null);
-    setSortBy(null);
-    setIsFilterActive(null);
-    setFilterVariables({
-      minDelta: null,
-      maxDelta: null,
-    });
-    setToFilter(null);
-    setFromFilter(null);
-    setSelectedPeriod(null);
-    setTypeFilter(null);
-    setTabAddress(null);
-    setFeedOrder(null);
-    setFeedRelevance(null);
-  };
+  const cleanupFilters = useResetProfileTabFilters();
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);

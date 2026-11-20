@@ -139,7 +139,9 @@ export const ProposalsTable = ({
     {
       accessorKey: "proposalName",
       meta: {
-        columnClassName: "w-50",
+        // Sized for the profile page, wider than the drawer this table
+        // came from: titles were truncated into the result column.
+        columnClassName: "w-50 lg:w-96",
       },
       cell: ({ row }) => {
         const proposalName = row.getValue("proposalName") as string;
@@ -167,7 +169,8 @@ export const ProposalsTable = ({
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary font-regular hover:border-primary max-w-48 truncate border-b border-dashed border-[#3F3F46] text-sm transition-colors"
+              title={proposalName}
+              className="text-primary font-regular hover:border-primary lg:max-w-88 max-w-44 truncate border-b border-dashed border-[#3F3F46] text-sm transition-colors"
             >
               {proposalName}
             </Link>
@@ -358,7 +361,13 @@ export const ProposalsTable = ({
       },
       header: () => (
         <div className="flex items-center gap-1.5">
-          <Tooltip tooltipContent="Measures how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion.">
+          {/* asChild: the sort button is the trigger. The default trigger is
+              a button of its own, and a button inside a button breaks
+              hydration now that the profile page renders this server-side. */}
+          <Tooltip
+            asChild
+            tooltipContent="Measures how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion."
+          >
             <Button
               variant="ghost"
               size="sm"
