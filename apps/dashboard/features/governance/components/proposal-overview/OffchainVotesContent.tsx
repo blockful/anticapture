@@ -212,11 +212,13 @@ export const OffchainVotesContent = ({
           }
 
           return (
-            <div className="flex h-10 items-center p-2">
+            // max-w + min-w-0: long Arkham labels truncate inside the column
+            // instead of running into the choice next to it.
+            <div className="flex h-10 min-w-0 max-w-[200px] items-center p-2">
               <AddressLink address={voter} />
               <CopyAndPasteButton
                 textToCopy={voter}
-                className="text-secondary hover:text-primary ml-2 inline-flex p-1 align-middle transition-colors"
+                className="text-secondary hover:text-primary ml-2 inline-flex shrink-0 p-1 align-middle transition-colors"
                 iconSize="md"
               />
             </div>
