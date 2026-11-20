@@ -13,7 +13,10 @@ import { useResetProfileTabFilters } from "@/features/holders-and-delegates/hook
 import { AddressActivityFeed } from "@/features/holders-and-delegates/profile/components/AddressActivityFeed";
 import { ProfileHeader } from "@/features/holders-and-delegates/profile/components/ProfileHeader";
 import { ProfileSummary } from "@/features/holders-and-delegates/profile/components/ProfileSummary";
+import { SnapshotParticipationCard } from "@/features/holders-and-delegates/profile/components/SnapshotParticipationCard";
+import { SnapshotVotesTable } from "@/features/holders-and-delegates/profile/components/SnapshotVotesTable";
 import { useAddressProfileSummary } from "@/features/holders-and-delegates/profile/hooks/useAddressProfileSummary";
+import { useSnapshotParticipation } from "@/features/holders-and-delegates/profile/hooks/useSnapshotParticipation";
 import { isServedBy } from "@/features/holders-and-delegates/profile/utils/isServedBy";
 import { BalanceHistory } from "@/features/holders-and-delegates/token-holder/drawer/balance-history/BalanceHistory";
 import { DelegationHistory } from "@/features/holders-and-delegates/token-holder/drawer/delegation-history/DelegationHistory";
@@ -42,6 +45,12 @@ type AddressProfileProps = {
  */
 export const AddressProfile = ({ daoId, address }: AddressProfileProps) => {
   const summary = useAddressProfileSummary({ daoId, address });
+  const snapshot = useSnapshotParticipation({ daoId, address });
+  // Snapshot votes alone are activity too: a voter can hold nothing onchain.
+  const hasNoActivity =
+    summary.hasNoActivity &&
+    snapshot.status !== "loading" &&
+    !(snapshot.status === "ready" && snapshot.value.votedProposals > 0);
   const tabs = useProfileTabs({ daoId, address });
   const resetTabFilters = useResetProfileTabFilters();
 
@@ -63,10 +72,10 @@ export const AddressProfile = ({ daoId, address }: AddressProfileProps) => {
       <ProfileHeader
         daoId={daoId}
         address={address}
-        reportPanel={summary.hasNoActivity ? "Profile" : activeTab.label}
+        reportPanel={hasNoActivity ? "Profile" : activeTab.label}
       />
 
-      {summary.hasNoActivity ? (
+      {hasNoActivity ? (
         <BlankSlate
           variant="title"
           icon={UserX}
@@ -76,7 +85,16 @@ export const AddressProfile = ({ daoId, address }: AddressProfileProps) => {
         />
       ) : (
         <>
-          <ProfileSummary daoId={daoId} address={address} summary={summary} />
+          <ProfileSummary
+            daoId={daoId}
+            address={address}
+            summary={summary}
+            extraParticipation={
+              daoConfigByDaoId[daoId].offchainProposals ? (
+                <SnapshotParticipationCard daoId={daoId} address={address} />
+              ) : null
+            }
+          />
 
           <div className="flex flex-col">
             {/* Scrolls sideways on phones instead of wrapping the tab row. */}
@@ -112,6 +130,7 @@ const useProfileTabs = ({
   const servesVotes = isServedBy(proposalsActivityPathParamsDaoEnum, daoId);
   // Only DAO APIs that register `feed()` serve GET /:dao/feed/events.
   const hasActivityFeed = Boolean(daoConfig.activityFeed);
+  const hasSnapshot = Boolean(daoConfig.offchainProposals);
 
   return [
     ...(servesVotes
@@ -126,6 +145,15 @@ const useProfileTabs = ({
                 withMetrics={false}
               />
             ),
+          },
+        ]
+      : []),
+    ...(hasSnapshot
+      ? [
+          {
+            value: "snapshot-votes",
+            label: "Snapshot votes",
+            content: <SnapshotVotesTable address={address} daoId={daoId} />,
           },
         ]
       : []),

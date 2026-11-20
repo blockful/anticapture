@@ -13,6 +13,7 @@ import type { ReactNode } from "react";
 import { useMemo } from "react";
 
 import { normalizeProposalDescription } from "@/features/governance/utils/normalizeProposalDescription";
+import { VoteReason } from "@/features/holders-and-delegates/profile/components/VoteReason";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import {
   getUserVoteData,
@@ -47,6 +48,8 @@ interface ProposalTableData {
   votingPower: number | null;
   voteTiming: { text: string; percentage: number };
   status: string;
+  /** What the voter wrote with the vote, when anything. */
+  reason: string | null;
 }
 
 interface ProposalsTableProps {
@@ -131,6 +134,7 @@ export const ProposalsTable = ({
             : 0,
         ),
         status: item.proposal?.status || "unknown",
+        reason: item.userVote?.reason?.trim() || null,
       };
     });
   }, [proposals, daoData, daoIdEnum, token]);
@@ -153,7 +157,8 @@ export const ProposalsTable = ({
           );
         }
 
-        const href = daoConfig[daoIdEnum]?.governancePage
+        const hasProposalPage = !!daoConfig[daoIdEnum]?.governancePage;
+        const href = hasProposalPage
           ? getDaoProposalPath({
               daoId: daoIdEnum,
               pathname,
@@ -165,8 +170,12 @@ export const ProposalsTable = ({
           <div className="flex items-center">
             <Link
               href={href}
-              target="_blank"
-              rel="noopener noreferrer"
+              // Our own proposal page opens in place, like any other link on
+              // the profile; an outside governance platform gets a new tab.
+              {...(!hasProposalPage && {
+                target: "_blank",
+                rel: "noopener noreferrer",
+              })}
               className="text-primary font-regular hover:border-primary max-w-48 truncate border-b border-dashed border-[#3F3F46] text-sm transition-colors"
             >
               {proposalName}
@@ -440,6 +449,14 @@ export const ProposalsTable = ({
         columns={proposalColumns}
         data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
         size="sm"
+        // Votes cast with a reason expand to show it, like the proposal page.
+        enableExpanding={!loading}
+        getRowCanExpand={(row) => !!row.original.reason}
+        renderSubComponent={(row) =>
+          row.original.reason ? (
+            <VoteReason reason={row.original.reason} />
+          ) : null
+        }
         hasMore={hasNextPage}
         isLoadingMore={fetchingMore}
         onLoadMore={fetchNextPage}

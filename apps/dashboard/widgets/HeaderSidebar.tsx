@@ -10,6 +10,7 @@ import {
   BottomNavigationButtons,
 } from "@/shared/components";
 import { AnticaptureIcon } from "@/shared/components/icons";
+import { MyProfileLink } from "@/shared/components/wallet/MyProfileLink";
 
 type HeaderItem = {
   page: string;
@@ -78,7 +79,8 @@ export const HeaderSidebar = () => {
             <div className="border-middle-dark mx-1.5 flex flex-col gap-2 border-b border-t py-2">
               <BottomNavigationButtons />
             </div>
-            <div className="mx-auto flex flex-col px-2 py-4">
+            <div className="mx-auto flex flex-col items-center gap-2 px-2 py-4">
+              <MyProfileLink />
               <ConnectWallet label="" className="px-2.5" />
             </div>
           </div>

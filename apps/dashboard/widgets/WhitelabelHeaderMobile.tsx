@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { DaoAvatarIcon } from "@/shared/components/icons";
+import { MyProfileLink } from "@/shared/components/wallet/MyProfileLink";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -49,6 +50,8 @@ export const WhitelabelHeaderMobile = ({
             </span>
           </Link>
           <div className="flex items-center gap-3">
+            {/* Phones reach it from the menu, where there is room for it. */}
+            <MyProfileLink className="hidden sm:flex" />
             <div className="flex h-full w-full">
               <WhitelabelConnectWallet className="max-w-[240px]" />
             </div>
