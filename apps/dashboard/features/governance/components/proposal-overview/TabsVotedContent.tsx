@@ -23,7 +23,7 @@ import { useVotesParams } from "@/features/governance/hooks/useVotesParams";
 import { SkeletonRow, Button, BlankSlate } from "@/shared/components";
 import { FetchErrorState } from "@/shared/components/errors/FetchErrorState";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import {
   CategoriesFilter,
@@ -45,13 +45,9 @@ const choiceFilterOptions: FilterOption[] = [
 
 interface TabsVotedContentProps {
   proposal: ProposalDetails;
-  onAddressClick?: (address: string) => void;
 }
 
-export const TabsVotedContent = ({
-  proposal,
-  onAddressClick,
-}: TabsVotedContentProps) => {
+export const TabsVotedContent = ({ proposal }: TabsVotedContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
   const { daoId } = useParams();
   const { filters, setFilters } = useVotesParams();
@@ -172,19 +168,10 @@ export const TabsVotedContent = ({
 
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
-              <button
-                onClick={() => onAddressClick?.(voterAddress)}
-                className="group min-w-0 cursor-pointer"
-              >
-                <EnsAvatar
-                  address={voterAddress as `0x${string}`}
-                  size="sm"
-                  variant="rounded"
-                  showName={true}
-                  isDashed={true}
-                  nameClassName="group-hover:border-primary transition-colors duration-200"
-                />
-              </button>
+              <AddressLink
+                address={voterAddress}
+                nameClassName="transition-colors duration-200"
+              />
               <CopyAndPasteButton
                 className="size-2 shrink-0"
                 textToCopy={voterAddress}
@@ -632,7 +619,6 @@ export const TabsVotedContent = ({
       sortBy,
       sortDirection,
       daoId,
-      onAddressClick,
       voterFilter,
       choiceFilter,
       setFilters,

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import type { BarProps } from "recharts";
 import {
   BarChart,
@@ -16,7 +16,7 @@ import { CustomBarShape } from "@/features/dao-overview/components/TopAccountsCh
 import { CustomTooltip } from "@/features/dao-overview/components/TopAccountsChartTooltip";
 import { useTopAccountsChartData } from "@/features/dao-overview/hooks/useTopAccountsChartData";
 import type { EntityType } from "@/shared/types/entities";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
+import { useOpenAddressProfile } from "@/shared/hooks/useAddressProfileHref";
 import type { DaoIdEnum } from "@/shared/types/daos";
 
 export interface TopAccountChartData {
@@ -39,15 +39,14 @@ export const TopAccountsChart = ({
   chartData: TopAccountChartData[];
   entityType: EntityType;
 }) => {
-  const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const chartConfig = useTopAccountsChartData({ chartData });
+  const openProfile = useOpenAddressProfile(daoId);
 
-  const handleOpenDrawer = useCallback(
-    (item: { address: string }) => setSelectedAddress(item.address),
-    [],
+  // A bar is the click target here; the profile page is where it leads.
+  const handleBarClick = useCallback(
+    (item: { address: string }) => openProfile(item.address),
+    [openProfile],
   );
-
-  const handleCloseDrawer = useCallback(() => setSelectedAddress(null), []);
 
   return (
     <div className="border-light-dark text-primary lg:bg-surface-default relative flex h-52 w-full items-center justify-center lg:rounded-lg">
@@ -65,18 +64,11 @@ export const TopAccountsChart = ({
             shape={(props: BarProps) => (
               <CustomBarShape {...(props as CustomBarShapeProps)} />
             )}
-            onClick={handleOpenDrawer}
+            onClick={handleBarClick}
             cursor="pointer"
           />
         </BarChart>
       </ResponsiveContainer>
-      <HoldersAndDelegatesDrawer
-        isOpen={!!selectedAddress}
-        onClose={handleCloseDrawer}
-        entityType={entityType}
-        address={selectedAddress || "None"}
-        daoId={daoId}
-      />
     </div>
   );
 };

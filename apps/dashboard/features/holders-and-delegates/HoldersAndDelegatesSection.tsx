@@ -85,8 +85,8 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
     "days",
     parseAsStringEnum(PERIOD_VALUES).withDefault(defaultDays),
   );
-  // Namespaced on purpose: the drawer's Balance History tab already owns plain
-  // `from`/`to` as address filters, and it clears them on every tab change.
+  // Namespaced on purpose: the profile's Balance tab owns plain `from`/`to` as
+  // address filters.
   const [fromParam, setFromParam] = useQueryState("rangeFrom");
   const [toParam, setToParam] = useQueryState("rangeTo");
   // Enum parsed, not a plain string: a stale `?tab=foo` would otherwise reach
@@ -97,7 +97,6 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   );
 
   // clean up filters when switching tabs
-  const setDrawerAddress = useQueryState("drawerAddress")[1];
   const setCurrentAddressFilter = useQueryState("address")[1];
   const setSortOrder = useQueryState("sort")[1];
   const setSortBy = useQueryState("sortBy")[1];
@@ -105,7 +104,6 @@ export const HoldersAndDelegatesSection = ({ daoId }: { daoId: DaoIdEnum }) => {
   const setMaxValue = useQueryState("maxValue")[1];
 
   const cleanupFilters = () => {
-    setDrawerAddress(null);
     setCurrentAddressFilter(null);
     setSortOrder(null);
     setSortBy(null);

@@ -14,7 +14,7 @@ import { parseUnits } from "viem";
 
 import { useAddressLabels } from "@anticapture/client/hooks";
 import type { AddressLabelsPathParamsDaoEnumKey } from "@anticapture/client";
-import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { useBalanceHistory } from "@/features/holders-and-delegates/hooks/useBalanceHistory";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
@@ -379,9 +379,8 @@ export const BalanceHistoryTable = ({
                 — under the ~101px a shortened address needs. It clips without
                 an ellipsis, so the shortfall read as a truncated character. */}
             <div className="text-primary flex max-w-48 items-center gap-2 overflow-hidden">
-              <DrawerAddressButton
+              <AddressLink
                 address={fromAddress as `0x${string}`}
-                entityType="tokenHolder"
                 nameClassName={cn(
                   "text-secondary max-w-[120px]",
                   fromAddress === accountId && "text-primary",
@@ -458,9 +457,8 @@ export const BalanceHistoryTable = ({
                 — under the ~101px a shortened address needs. It clips without
                 an ellipsis, so the shortfall read as a truncated character. */}
             <div className="text-primary flex max-w-48 items-center gap-2 overflow-hidden">
-              <DrawerAddressButton
+              <AddressLink
                 address={toAddress as `0x${string}`}
-                entityType="tokenHolder"
                 nameClassName={cn(
                   "text-secondary max-w-[120px]",
                   toAddress === accountId && "text-primary",

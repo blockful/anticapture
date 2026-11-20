@@ -1,7 +1,5 @@
 "use client";
 
-import type { Address } from "viem";
-
 import { CalldataReviewedBadge } from "@/features/governance/components/proposal-overview/CalldataReviewedBadge";
 import { ProposalBadge } from "@/features/governance/components/proposal-overview/ProposalBadge";
 import { ProposalSourceBadge } from "@/features/governance/components/proposal-overview/ProposalSourceBadge";
@@ -9,7 +7,7 @@ import type {
   ProposalStatus,
   ProposalViewData,
 } from "@/features/governance/types";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { DefaultLink } from "@/shared/components/design-system/links/default-link";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfigByDaoId from "@/shared/dao-config";
@@ -39,21 +37,13 @@ const DAO_TWITTER_HANDLES: Record<string, string> = {
 
 interface TitleSectionProps {
   proposal: ProposalViewData;
-  onAddressClick?: (address: string) => void;
   isOffchain?: boolean;
 }
 
 export const TitleSection = ({
   proposal,
-  onAddressClick,
   isOffchain = false,
 }: TitleSectionProps) => {
-  const handleOpenDrawer = () => {
-    if (proposal?.proposerAccountId) {
-      onAddressClick?.(proposal.proposerAccountId);
-    }
-  };
-
   const daoIdKey = proposal.daoId.toUpperCase() as DaoIdEnum;
   const daoConfig = daoConfigByDaoId[daoIdKey];
   const twitterHandle = DAO_TWITTER_HANDLES[proposal.daoId.toUpperCase()] ?? "";
@@ -73,18 +63,14 @@ export const TitleSection = ({
 
         <BulletDivider className="bg-border-contrast" />
 
-        {/* Proposer - Clickable to open delegate drawer */}
-        <button
-          onClick={handleOpenDrawer}
-          className="group cursor-pointer rounded-md p-1"
-        >
-          <EnsAvatar
-            size="xs"
-            address={proposal?.proposerAccountId as Address}
-            nameClassName="text-secondary group-hover:border-primary transition-colors duration-200"
-            isDashed
-          />
-        </button>
+        {/* Proposer, linked to their profile (onchain and Snapshot alike) */}
+        <AddressLink
+          address={proposal.proposerAccountId}
+          daoId={daoIdKey}
+          size="xs"
+          className="rounded-md p-1"
+          nameClassName="text-secondary transition-colors duration-200"
+        />
       </div>
 
       <div className="flex w-full flex-col gap-2">

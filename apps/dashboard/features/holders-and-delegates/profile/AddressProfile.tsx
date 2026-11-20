@@ -6,11 +6,11 @@ import { parseAsString, useQueryState } from "nuqs";
 import type { ReactNode } from "react";
 import type { Address } from "viem";
 
-import { DrawerActivityFeed } from "@/features/holders-and-delegates/components/DrawerActivityFeed";
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
 import { DelegateProposalsActivity } from "@/features/holders-and-delegates/delegate/drawer/votes/DelegateProposalsActivity";
 import { VotingPowerHistory } from "@/features/holders-and-delegates/delegate/drawer/voting-power-history/VotingPowerHistory";
 import { useResetProfileTabFilters } from "@/features/holders-and-delegates/hooks/useResetProfileTabFilters";
+import { AddressActivityFeed } from "@/features/holders-and-delegates/profile/components/AddressActivityFeed";
 import { ProfileHeader } from "@/features/holders-and-delegates/profile/components/ProfileHeader";
 import { ProfileSummary } from "@/features/holders-and-delegates/profile/components/ProfileSummary";
 import { useAddressProfileSummary } from "@/features/holders-and-delegates/profile/hooks/useAddressProfileSummary";
@@ -159,7 +159,7 @@ const useProfileTabs = ({
           {
             value: "activity",
             label: "Activity",
-            content: <DrawerActivityFeed address={address} daoId={daoId} />,
+            content: <AddressActivityFeed address={address} daoId={daoId} />,
           },
         ]
       : []),

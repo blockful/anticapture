@@ -8,10 +8,7 @@ import { useMemo } from "react";
 import type { Address } from "viem";
 import { formatUnits, parseUnits } from "viem";
 
-import {
-  useDelegates,
-  HoldersAndDelegatesDrawer,
-} from "@/features/holders-and-delegates";
+import { useDelegates } from "@/features/holders-and-delegates";
 import { DelegateButton } from "@/features/holders-and-delegates/delegate/DelegateButton";
 import { ProgressCircle } from "@/features/holders-and-delegates/components/ProgressCircle";
 import {
@@ -20,7 +17,7 @@ import {
 } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, SimpleProgressBar } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
@@ -30,13 +27,13 @@ import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import daoConfig from "@/shared/dao-config";
+import { useOpenAddressProfile } from "@/shared/hooks/useAddressProfileHref";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { useDao } from "@anticapture/client/hooks";
 import type { DaoPathParamsDaoEnumKey } from "@anticapture/client";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
-import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 
 type ActivityStatus = "inactive" | "neverVoted" | "noProposals";
 
@@ -101,13 +98,7 @@ export const Delegates = ({
 }: DelegatesProps) => {
   const pageLimit: number = 20;
 
-  // Validated like the Token Holders tab does: a stale or hand-edited
-  // `?drawerAddress=foo` would otherwise open the drawer on a value every
-  // address query below rejects.
-  const [drawerAddress, setDrawerAddress] = useQueryState(
-    "drawerAddress",
-    parseAsAddress,
-  );
+  const openProfile = useOpenAddressProfile(daoId);
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
   const [sortOrder, setSortOrder] = useQueryState(
@@ -297,11 +288,9 @@ export const Delegates = ({
         return (
           <div className="group flex w-40 items-center lg:w-full">
             <div className="min-w-0 flex-1">
-              <EnsAvatar
-                address={address as Address}
-                size="sm"
-                variant="rounded"
-                isDashed={true}
+              <AddressLink
+                address={address}
+                daoId={daoId}
                 nameClassName="[tr:hover_&]:border-primary"
               />
             </div>
@@ -667,7 +656,7 @@ export const Delegates = ({
         <Table
           columns={delegateColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
-          onRowClick={(row) => setDrawerAddress(row.address as Address)}
+          onRowClick={(row) => openProfile(row.address)}
           withRowBorders
           hasMore={hasNextPage}
           isLoadingMore={fetchingMore}
@@ -678,13 +667,6 @@ export const Delegates = ({
           fillHeight
         />
       </div>
-      <HoldersAndDelegatesDrawer
-        isOpen={!!drawerAddress}
-        onClose={() => setDrawerAddress(null)}
-        entityType="delegate"
-        address={drawerAddress || ""}
-        daoId={daoId}
-      />
     </>
   );
 };

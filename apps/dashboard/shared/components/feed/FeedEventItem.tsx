@@ -25,13 +25,12 @@ import {
   type FeedDelegationMetadata,
 } from "@anticapture/client";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { DividerDefault } from "@/shared/components/design-system/divider/DividerDefault";
 import { BulletDivider } from "@/shared/components/design-system/section";
 import daoConfig from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import type { EntityType } from "@/shared/types/entities";
 import { cn } from "@/shared/utils/cn";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
 import { getDaoProposalPath } from "@/shared/utils/whitelabel";
@@ -40,7 +39,6 @@ interface FeedEventItemProps {
   event: FeedItem;
   className?: string;
   isLast?: boolean;
-  onRowClick?: (address: string, entityType: EntityType) => void;
 }
 
 const getBadgeIcon = (type: FeedEventType) => {
@@ -121,35 +119,23 @@ const formatTime = (timestamp: number) => {
   });
 };
 
-const AddressButton = ({
-  address,
-  entityType,
-  onRowClick,
-}: {
-  address: Address;
-  entityType: EntityType;
-  onRowClick?: (address: string, entityType: EntityType) => void;
-}) => (
-  <button
-    data-testid="feed-address-button"
-    className="group inline-flex cursor-pointer items-center gap-1.5 align-middle"
-    onClick={() => onRowClick?.(address, entityType)}
+const FeedAddress = ({ address }: { address: Address }) => (
+  <span
+    data-testid="feed-address"
+    className="inline-flex items-center gap-1.5 align-middle"
   >
-    <EnsAvatar
+    <AddressLink
       address={address}
-      showAvatar={true}
       size="xs"
-      isDashed={true}
-      nameClassName="text-primary font-medium group-hover:border-primary transition-colors duration-200"
+      nameClassName="text-primary font-medium transition-colors duration-200"
     />
-  </button>
+  </span>
 );
 
 export const FeedEventItem = ({
   event,
   className,
   isLast = false,
-  onRowClick,
 }: FeedEventItemProps) => {
   const { daoId } = useParams<{ daoId: DaoIdEnum }>();
   const pathname = usePathname();
@@ -179,11 +165,7 @@ export const FeedEventItem = ({
         const voterAddress = voteMetadata.voter as Address;
         return (
           <div className="leading-relaxed">
-            <AddressButton
-              address={voterAddress}
-              entityType="delegate"
-              onRowClick={onRowClick}
-            />{" "}
+            <FeedAddress address={voterAddress} />{" "}
             <CopyAndPasteButton
               textToCopy={voterAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -253,11 +235,7 @@ export const FeedEventItem = ({
         const proposerAddress = proposalMetadata.proposer as Address;
         return (
           <div className="leading-relaxed">
-            <AddressButton
-              address={proposerAddress}
-              entityType="delegate"
-              onRowClick={onRowClick}
-            />{" "}
+            <FeedAddress address={proposerAddress} />{" "}
             <CopyAndPasteButton
               textToCopy={proposerAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -345,11 +323,7 @@ export const FeedEventItem = ({
         const toAddress = transferMetadata.to as Address;
         return (
           <div className="leading-relaxed">
-            <AddressButton
-              address={fromAddress}
-              entityType="tokenHolder"
-              onRowClick={onRowClick}
-            />{" "}
+            <FeedAddress address={fromAddress} />{" "}
             <CopyAndPasteButton
               textToCopy={fromAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -360,11 +334,7 @@ export const FeedEventItem = ({
               {formatAmount(transferMetadata.amount)} {tokenSymbol}
             </span>{" "}
             <span className="text-secondary">to</span>{" "}
-            <AddressButton
-              address={toAddress}
-              entityType="tokenHolder"
-              onRowClick={onRowClick}
-            />{" "}
+            <FeedAddress address={toAddress} />{" "}
             <CopyAndPasteButton
               textToCopy={toAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -397,11 +367,7 @@ export const FeedEventItem = ({
 
         return (
           <div className="leading-relaxed">
-            <AddressButton
-              address={delegatorAddress}
-              entityType="tokenHolder"
-              onRowClick={onRowClick}
-            />{" "}
+            <FeedAddress address={delegatorAddress} />{" "}
             <CopyAndPasteButton
               textToCopy={delegatorAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -416,11 +382,7 @@ export const FeedEventItem = ({
             {hasRedelegation && (
               <>
                 <span className="text-secondary">from</span>{" "}
-                <AddressButton
-                  address={previousDelegateAddress!}
-                  entityType="delegate"
-                  onRowClick={onRowClick}
-                />{" "}
+                <FeedAddress address={previousDelegateAddress!} />{" "}
                 <CopyAndPasteButton
                   textToCopy={previousDelegateAddress!}
                   className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"
@@ -429,11 +391,7 @@ export const FeedEventItem = ({
               </>
             )}
             <span className="text-secondary">to</span>{" "}
-            <AddressButton
-              address={delegateAddress}
-              entityType="delegate"
-              onRowClick={onRowClick}
-            />{" "}
+            <FeedAddress address={delegateAddress} />{" "}
             <CopyAndPasteButton
               textToCopy={delegateAddress}
               className="text-secondary hover:text-primary inline-flex p-1 align-middle transition-colors"

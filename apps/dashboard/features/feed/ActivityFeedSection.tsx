@@ -8,7 +8,6 @@ import { FeedEventSkeleton } from "@/features/feed/components/FeedEventSkeleton"
 import { useActivityFeed } from "@/features/feed/hooks/useActivityFeed";
 import { useActivityFeedParams } from "@/features/feed/hooks/useActivityFeedParams";
 import { getActivityFeedRenderState } from "@/features/feed/utils/activityFeedRenderState";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates/components/HoldersAndDelegatesDrawer";
 import { TheSectionLayout } from "@/shared/components/containers/TheSectionLayout";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
@@ -19,17 +18,10 @@ import {
   BulletDivider,
 } from "@/shared/components/design-system/section";
 import { PAGES_CONSTANTS } from "@/shared/constants/pages-constants";
-import { useDaoId } from "@/shared/providers/DaoIdProvider";
-import type { EntityType } from "@/shared/types/entities";
 import { cn } from "@/shared/utils/cn";
 
 export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {
-  const daoId = useDaoId();
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
-  const [drawerState, setDrawerState] = useState<{
-    address: string;
-    entityType: EntityType;
-  } | null>(null);
   const { filters, setFilters, clearFilters, activeFiltersCount } =
     useActivityFeedParams();
 
@@ -105,17 +97,6 @@ export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {
         </Button>
       }
     >
-      {/* Holders / Delegates Drawer */}
-      {drawerState && (
-        <HoldersAndDelegatesDrawer
-          isOpen={true}
-          onClose={() => setDrawerState(null)}
-          entityType={drawerState.entityType}
-          address={drawerState.address}
-          daoId={daoId}
-        />
-      )}
-
       {/* Filter Drawer */}
       <ActivityFeedFiltersDrawer
         isOpen={isFilterDrawerOpen}
@@ -191,9 +172,6 @@ export const ActivityFeedSection = ({ feedDaoId }: { feedDaoId: string }) => {
                   key={`${event.txHash}-${event.logIndex}`}
                   event={event}
                   isLast={index === group.events.length - 1}
-                  onRowClick={(address, entityType) =>
-                    setDrawerState({ address, entityType })
-                  }
                 />
               ))}
             </div>

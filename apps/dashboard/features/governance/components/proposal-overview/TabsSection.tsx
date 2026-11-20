@@ -16,7 +16,6 @@ type TabId = "description" | "votes" | "actions";
 
 interface TabsSectionProps {
   proposal: ProposalViewData;
-  onAddressClick?: (address: string) => void;
   isOffchain?: boolean;
   isWhitelabel?: boolean;
   offchainProposalId?: string;
@@ -30,7 +29,6 @@ interface TabsSectionProps {
 
 export const TabsSection = ({
   proposal,
-  onAddressClick,
   isOffchain = false,
   isWhitelabel = false,
   offchainProposalId,
@@ -73,10 +71,7 @@ export const TabsSection = ({
             proposalType={offchainProposalType}
           />
         ) : (
-          <VotesTabContent
-            proposal={onchainProposal}
-            onAddressClick={onAddressClick}
-          />
+          <VotesTabContent proposal={onchainProposal} />
         );
       case "actions":
         return isOffchain ? null : (
