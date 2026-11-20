@@ -367,7 +367,13 @@ export const ProposalsTable = ({
       },
       header: () => (
         <div className="flex items-center gap-1.5">
-          <Tooltip tooltipContent="Measures how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion.">
+          {/* asChild: the sort button is the trigger. The default trigger is
+              a button of its own, and a button inside a button breaks
+              hydration now that the profile page renders this server-side. */}
+          <Tooltip
+            asChild
+            tooltipContent="Measures how close to the proposal deadline a vote is cast. Delegates who vote late may be influenced by prior votes or ongoing discussion."
+          >
             <Button
               variant="ghost"
               size="sm"

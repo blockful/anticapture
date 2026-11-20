@@ -4,6 +4,7 @@ import { proposalsActivityPathParamsDaoEnum } from "@anticapture/client";
 import { UserX } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import type { ReactNode } from "react";
+import { useEffect, useRef } from "react";
 import type { Address } from "viem";
 
 import { VoteComposition } from "@/features/holders-and-delegates/delegate/drawer/vote-composition/VoteComposition";
@@ -59,6 +60,22 @@ export const AddressProfile = ({ daoId, address }: AddressProfileProps) => {
   // feed), so fall back to the first one instead of an empty panel.
   const activeTab = tabs.find((tab) => tab.value === tabParam) ?? tabs[0];
 
+  // A link straight to a later tab (`?tab=activity`) would otherwise leave
+  // the selected tab scrolled out of the row on narrow screens.
+  const tabRowRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const row = tabRowRef.current;
+    const selected = row?.querySelector('[aria-selected="true"]');
+    if (!row || !selected) return;
+    // Horizontal only: scrollIntoView would also scroll the page down to the
+    // tab row on load.
+    const rowBox = row.getBoundingClientRect();
+    const tabBox = selected.getBoundingClientRect();
+    if (tabBox.right > rowBox.right || tabBox.left < rowBox.left) {
+      row.scrollLeft += tabBox.left - rowBox.left;
+    }
+  }, [activeTab.value]);
+
   const handleTabChange = (value: string) => {
     resetTabFilters();
     // The first tab is the default: no param keeps the canonical URL clean.
@@ -98,7 +115,7 @@ export const AddressProfile = ({ daoId, address }: AddressProfileProps) => {
 
           <div className="flex flex-col">
             {/* Scrolls sideways on phones instead of wrapping the tab row. */}
-            <div className="overflow-x-auto">
+            <div ref={tabRowRef} className="overflow-x-auto">
               <TabGroup
                 tabs={tabs.map(({ value, label }) => ({ value, label }))}
                 activeTab={activeTab.value}

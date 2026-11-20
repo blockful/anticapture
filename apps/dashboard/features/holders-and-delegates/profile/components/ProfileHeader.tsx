@@ -38,9 +38,6 @@ export const ProfileHeader = ({
     },
   });
   const ensName = enrichment?.ens?.name ?? null;
-  const hasDisplayName = Boolean(
-    ensName || enrichment?.arkham?.entity || enrichment?.arkham?.label,
-  );
 
   const daoConfig = daoConfigByDaoId[daoId];
   const explorerUrl = daoConfig.daoOverview.chain.blockExplorers?.default.url;
@@ -51,10 +48,10 @@ export const ProfileHeader = ({
     showTags: true,
     showEfpStats: true,
     showSocials: true,
-    // Without a name the avatar shows the address itself, so it carries the
-    // copy button; with one, the full address gets its own line below.
-    showFullAddress: !hasDisplayName,
-    showCopyAddress: !hasDisplayName,
+    // The full address always gets its own line below, where it can wrap on
+    // a phone; the name row keeps the ENS name or the short form.
+    showFullAddress: false,
+    showCopyAddress: false,
   };
 
   return (
@@ -71,20 +68,18 @@ export const ProfileHeader = ({
             maxVisibleTags={3}
           />
         </div>
-        {hasDisplayName && (
-          <div className="text-secondary flex min-w-0 items-center gap-1 font-mono text-xs">
-            <span className="break-all">{address}</span>
-            <CopyAndPasteButton
-              textToCopy={address}
-              className="p-1"
-              iconSize="md"
-              customTooltipText={{
-                default: "Copy address",
-                copied: "Address copied!",
-              }}
-            />
-          </div>
-        )}
+        <div className="text-secondary flex min-w-0 items-center gap-1 font-mono text-xs">
+          <span className="break-all">{address}</span>
+          <CopyAndPasteButton
+            textToCopy={address}
+            className="p-1"
+            iconSize="md"
+            customTooltipText={{
+              default: "Copy address",
+              copied: "Address copied!",
+            }}
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
