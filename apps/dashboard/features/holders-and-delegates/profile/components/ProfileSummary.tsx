@@ -102,7 +102,10 @@ export const ProfileSummary = ({
           value={renderMetric(
             participation,
             ({ votedProposals, totalProposals }) =>
-              `Voted ${votedProposals} of ${totalProposals} (${formatShare(votedProposals, totalProposals)})`,
+              // The API counts from the first vote, so a non-voter is 0 of 0.
+              votedProposals === 0
+                ? "Never voted"
+                : `Voted ${votedProposals} of ${totalProposals} (${formatShare(votedProposals, totalProposals)})`,
           )}
         />
         {extraParticipation}
