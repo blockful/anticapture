@@ -1,6 +1,9 @@
+import { isAddress } from "viem";
+
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoConfiguration } from "@/shared/dao-config/types";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { toDaoIdEnum } from "@/shared/types/daos";
 
 export const WHITELABEL_ROUTES = {
   proposals: "proposals",
@@ -13,6 +16,7 @@ export const WHITELABEL_ROUTES = {
   notifications: "notifications",
   governanceSettings: "governance-settings",
   sppAccountability: "spp-accountability",
+  address: "address",
 } as const;
 
 export type WhitelabelRouteSlug =
@@ -172,6 +176,83 @@ export const getDaoNotificationsPath = ({
   return "/alerts";
 };
 
+/**
+ * Path of an address profile inside the DAO, for whichever shell the current
+ * page belongs to: `/{dao}/address/{address}` on the main app,
+ * `/whitelabel/{dao}/address/{address}` on the internal whitelabel path and
+ * `/address/{address}` on a whitelabel domain.
+ */
+export const getDaoAddressPath = ({
+  daoId,
+  pathname,
+  address,
+}: {
+  daoId: DaoIdEnum;
+  pathname: string;
+  address: string;
+}) => {
+  const basePath = getWhitelabelBasePath({ daoId, pathname });
+  const addressRoute = `${WHITELABEL_ROUTES.address}/${address}`;
+
+  if (basePath.startsWith("/whitelabel/")) {
+    return `${basePath}/${addressRoute}`;
+  }
+
+  // External whitelabel domain: middleware rewrites the path, so pathname
+  // doesn't include the daoId prefix (basePath is "")
+  if (basePath === "" && isWhitelabelDao(daoConfigByDaoId[daoId])) {
+    return `/${addressRoute}`;
+  }
+
+  return `/${daoId.toLowerCase()}/${addressRoute}`;
+};
+
+/**
+ * Where a URL from before the profile page existed should land. The profile
+ * used to be a drawer opened by `?drawerAddress=0x…` on the holders and
+ * delegates pages, and the whitelabel had a `delegates/{address}` route that
+ * only opened that drawer. Returns null when the URL is not one of those.
+ *
+ * `whitelabelDaoId` is the DAO resolved from the request host: on a whitelabel
+ * domain the visible path carries no DAO prefix.
+ */
+export const getLegacyProfileRedirectPath = ({
+  pathname,
+  searchParams,
+  whitelabelDaoId,
+}: {
+  pathname: string;
+  searchParams: URLSearchParams;
+  whitelabelDaoId: DaoIdEnum | null;
+}): string | null => {
+  const segments = pathname.split("/").filter(Boolean);
+  const drawerAddress = searchParams.get("drawerAddress");
+  const delegatesIndex = segments.indexOf(WHITELABEL_ROUTES.delegates);
+  const delegateRouteAddress =
+    delegatesIndex >= 0 && delegatesIndex === segments.length - 2
+      ? segments[delegatesIndex + 1]
+      : null;
+
+  const address = [drawerAddress, delegateRouteAddress].find(
+    (candidate): candidate is string =>
+      !!candidate && isAddress(candidate, { strict: false }),
+  );
+
+  if (!address) return null;
+
+  const addressRoute = `${WHITELABEL_ROUTES.address}/${address}`;
+
+  if (whitelabelDaoId) return `/${addressRoute}`;
+
+  if (segments[0] === "whitelabel" && segments[1]) {
+    const daoId = toDaoIdEnum(segments[1]);
+    return daoId ? `/whitelabel/${daoId.toLowerCase()}/${addressRoute}` : null;
+  }
+
+  const daoId = segments[0] ? toDaoIdEnum(segments[0]) : null;
+  return daoId ? `/${daoId.toLowerCase()}/${addressRoute}` : null;
+};
+
 export const isWhitelabelProposalDetailPath = (pathname: string) =>
   /\/proposals\/[^/]+$/.test(pathname);
 
@@ -208,6 +289,7 @@ export const getWhitelabelInternalPath = ({
     `/${WHITELABEL_ROUTES.notifications}`,
     `/${WHITELABEL_ROUTES.governanceSettings}`,
     `/${WHITELABEL_ROUTES.sppAccountability}`,
+    `/${WHITELABEL_ROUTES.address}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.proposals}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.delegates}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.stakeholders}`,
@@ -218,6 +300,7 @@ export const getWhitelabelInternalPath = ({
     `/${daoSlug}/${WHITELABEL_ROUTES.notifications}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.governanceSettings}`,
     `/${daoSlug}/${WHITELABEL_ROUTES.sppAccountability}`,
+    `/${daoSlug}/${WHITELABEL_ROUTES.address}`,
   ];
 
   const matchedCandidate = candidates.find(

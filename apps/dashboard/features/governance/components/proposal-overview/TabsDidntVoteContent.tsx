@@ -11,7 +11,7 @@ import { useNonVoters } from "@/features/governance/hooks/useNonVoters";
 import { useNonVotersParams } from "@/features/governance/hooks/useNonVotersParams";
 import { SkeletonRow, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { Tooltip } from "@/shared/components/design-system/tooltips/Tooltip";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import daoConfig from "@/shared/dao-config";
@@ -20,12 +20,10 @@ import { cn, formatNumberUserReadable } from "@/shared/utils";
 
 interface TabsDidntVoteContentProps {
   proposal: ProposalDetails;
-  onAddressClick?: (address: string) => void;
 }
 
 export const TabsDidntVoteContent = ({
   proposal,
-  onAddressClick,
 }: TabsDidntVoteContentProps) => {
   const loadingRowRef = useRef<HTMLTableRowElement>(null);
   const { daoId } = useParams<{ daoId: string }>();
@@ -121,19 +119,10 @@ export const TabsDidntVoteContent = ({
 
           return (
             <div className="flex h-10 w-full items-center gap-3 p-2">
-              <button
-                onClick={() => onAddressClick?.(voterAddress)}
-                className="group min-w-0 cursor-pointer"
-              >
-                <EnsAvatar
-                  address={voterAddress as `0x${string}`}
-                  size="sm"
-                  variant="rounded"
-                  showName={true}
-                  isDashed={true}
-                  nameClassName="group-hover:border-primary transition-colors duration-200"
-                />
-              </button>
+              <AddressLink
+                address={voterAddress}
+                nameClassName="transition-colors duration-200"
+              />
               <CopyAndPasteButton
                 textToCopy={voterAddress}
                 className="size-2 shrink-0"

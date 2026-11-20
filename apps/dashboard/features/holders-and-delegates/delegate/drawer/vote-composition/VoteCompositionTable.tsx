@@ -9,7 +9,7 @@ import { formatUnits } from "viem";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
@@ -92,10 +92,7 @@ export const VoteCompositionTable = ({
         const addressValue: string = row.original.address;
         return (
           <div className="flex w-full items-center gap-2">
-            <DrawerAddressButton
-              address={addressValue as Address}
-              entityType="tokenHolder"
-            />
+            <AddressLink address={addressValue as Address} />
             <div className="flex items-center opacity-0 transition-opacity [tr:hover_&]:opacity-100">
               <CopyAndPasteButton
                 textToCopy={addressValue as `0x${string}`}

@@ -201,7 +201,10 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
     });
   });
 
-  test("opening a holder drawer shows drawer tabs", async ({ goto, page }) => {
+  test("opening a holder goes to the address profile", async ({
+    goto,
+    page,
+  }) => {
     await goto("/ens/stakeholders");
     await selectTab(page, "Token Holders");
     await expect(page.locator("table").first()).toBeVisible({
@@ -247,20 +250,21 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
       return;
     }
     await detailsButton.click({ force: true });
-    await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
-    // Check drawer tab labels
+    await expect(page).toHaveURL(/\/ens\/address\/0x[0-9a-fA-F]{40}/, {
+      timeout: 10_000,
+    });
     await expect(
-      page.locator('[role="tab"]').filter({ hasText: "Delegation History" }),
+      page.locator('[role="tab"]').filter({ hasText: "Delegations" }),
     ).toBeVisible({ timeout: 10_000 });
     await expect(
-      page.locator('[role="tab"]').filter({ hasText: "Top Interactions" }),
+      page.locator('[role="tab"]').filter({ hasText: "Top interactions" }),
     ).toBeVisible();
     await expect(
-      page.locator('[role="tab"]').filter({ hasText: "Balance History" }),
+      page.locator('[role="tab"]').filter({ hasText: "Balance & transfers" }),
     ).toBeVisible();
   });
 
-  test("opening a delegate drawer shows drawer tabs", async ({
+  test("opening a delegate goes to the address profile", async ({
     goto,
     page,
   }) => {
@@ -304,12 +308,14 @@ test.describe("Stakeholders page (/ens/stakeholders)", () => {
       return;
     }
     await detailsButton.click({ force: true });
-    await expect(page).toHaveURL(/drawerAddress=/, { timeout: 10_000 });
+    await expect(page).toHaveURL(/\/ens\/address\/0x[0-9a-fA-F]{40}/, {
+      timeout: 10_000,
+    });
     await expect(
-      page.locator('[role="tab"]').filter({ hasText: "Vote Composition" }),
+      page.locator('[role="tab"]').filter({ hasText: /^Voting power$/ }),
     ).toBeVisible({ timeout: 10_000 });
     await expect(
-      page.locator('[role="tab"]').filter({ hasText: "Voting Power History" }),
+      page.locator('[role="tab"]').filter({ hasText: "Voting power history" }),
     ).toBeVisible();
   });
 

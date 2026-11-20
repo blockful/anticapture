@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { formatUnits } from "viem";
 import type { Address } from "viem";
 
-import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { getNextPageParam } from "@anticapture/client";
 import type { FormerDelegatorsPathParamsDaoEnumKey } from "@anticapture/client";
@@ -70,10 +70,7 @@ export const FormerDelegatorsTable = ({
         isLoading ? (
           <SkeletonRow className="h-5 w-28" />
         ) : (
-          <DrawerAddressButton
-            address={row.original.address}
-            entityType="tokenHolder"
-          />
+          <AddressLink address={row.original.address} />
         ),
       meta: { columnClassName: "w-48" },
     },
@@ -132,7 +129,7 @@ export const FormerDelegatorsTable = ({
         if (isLoading) return <SkeletonRow className="h-5 w-28" />;
         const to = row.original.redelegatedTo;
         return to ? (
-          <DrawerAddressButton address={to} entityType="delegate" />
+          <AddressLink address={to} />
         ) : (
           <span className="text-secondary text-sm">-</span>
         );

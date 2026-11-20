@@ -103,24 +103,22 @@ test.describe("Activity Feed page (/ens/activity-feed)", () => {
     await expect(eventRelevanceBadge).toBeVisible();
   });
 
-  test("event address click opens entity drawer when events exist", async ({
+  test("event address click opens the address profile when events exist", async ({
     goto,
     page,
   }) => {
     await goto("/ens/activity-feed");
-    // Feed AddressButtons open a drawer via local state (no URL update).
-    const addressBtn = page
-      .locator('[data-testid="feed-address-button"]')
+    const addressLink = page
+      .locator('[data-testid="feed-address"] a[href*="/address/"]')
       .first();
-    const count = await addressBtn.count();
+    const count = await addressLink.count();
     if (count === 0) return; // no events with address links, skip
-    await addressBtn.click();
-    // Drawer renders entity tabs; assert one is visible.
+    await addressLink.click();
+    await expect(page).toHaveURL(/\/ens\/address\/0x[0-9a-fA-F]{40}/, {
+      timeout: 10_000,
+    });
     await expect(
-      page
-        .locator('[role="tab"]')
-        .filter({ hasText: /Delegation History|Voting Power History/ })
-        .first(),
+      page.locator('[role="tab"]').filter({ hasText: "Voting power" }).first(),
     ).toBeVisible({ timeout: 10_000 });
   });
 });

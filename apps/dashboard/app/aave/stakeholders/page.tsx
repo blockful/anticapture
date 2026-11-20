@@ -42,7 +42,6 @@ function AavePageContent() {
     ),
   );
 
-  const setDrawerAddress = useQueryState("drawerAddress")[1];
   const setCurrentAddressFilter = useQueryState("address")[1];
   const setSortOrder = useQueryState("sort")[1];
   const setSortBy = useQueryState("sortBy")[1];
@@ -50,7 +49,6 @@ function AavePageContent() {
   const setMaxValue = useQueryState("maxValue")[1];
 
   const cleanupFilters = () => {
-    setDrawerAddress(null);
     setCurrentAddressFilter(null);
     setSortOrder(null);
     setSortBy(null);

@@ -6,12 +6,11 @@ import { parseAsStringEnum, useQueryState } from "nuqs";
 import type { Address } from "viem";
 import { parseUnits, zeroAddress } from "viem";
 
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { useTokenHolders } from "@/features/holders-and-delegates/hooks/useTokenHolders";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { Button } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { BadgeStatus } from "@/shared/components/design-system/badges";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -20,6 +19,7 @@ import { Percentage } from "@/shared/components/design-system/table/Percentage";
 import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons/ArrowUpDown";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
+import { useOpenAddressProfile } from "@/shared/hooks/useAddressProfileHref";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { useGetAddress } from "@anticapture/client/hooks";
 import { DaoIdEnum } from "@/shared/types/daos";
@@ -31,7 +31,6 @@ import {
   type AccountBalancesQueryParamsOrderByEnumKey,
   type OrderDirection,
 } from "@anticapture/client";
-import { parseAsAddress } from "@/shared/utils/parseAsAddress";
 import daoConfigByDaoId from "@/shared/dao-config";
 import { useMemo } from "react";
 import { useDelegatesActivity } from "@/features/holders-and-delegates/hooks/useDelegatesActivity";
@@ -94,10 +93,7 @@ export const TokenHolders = ({
   daoId: DaoIdEnum;
   showTokenName?: boolean;
 }) => {
-  const [drawerAddress, setDrawerAddress] = useQueryState(
-    "drawerAddress",
-    parseAsAddress,
-  );
+  const openProfile = useOpenAddressProfile(daoId);
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
   const [orderDirection, setOrderDirection] = useQueryState(
@@ -236,11 +232,9 @@ export const TokenHolders = ({
         return (
           <div className="group flex w-full items-center">
             <div className="min-w-0 flex-1">
-              <EnsAvatar
-                address={addressValue as Address}
-                size="sm"
-                variant="rounded"
-                isDashed={true}
+              <AddressLink
+                address={addressValue}
+                daoId={daoId}
                 nameClassName="[tr:hover_&]:border-primary"
               />
             </div>
@@ -453,10 +447,9 @@ export const TokenHolders = ({
           activity.votedProposals === 0;
 
         return (
-          <EnsAvatar
-            address={delegate as Address}
-            size="sm"
-            variant="rounded"
+          <AddressLink
+            address={delegate}
+            daoId={daoId}
             subtitle={
               isActivityLoadingFor(delegate) ? (
                 <SkeletonRow
@@ -501,7 +494,7 @@ export const TokenHolders = ({
             hasMore={hasNextPage}
             isLoadingMore={isFetchingNextPage}
             onLoadMore={fetchNextPage}
-            onRowClick={(row) => setDrawerAddress(row.address)}
+            onRowClick={(row) => openProfile(row.address)}
             withRowBorders
             withDownloadCSV={true}
             csvFilename="token-holders.csv"
@@ -510,13 +503,6 @@ export const TokenHolders = ({
           />
         </div>
       </div>
-      <HoldersAndDelegatesDrawer
-        isOpen={!!drawerAddress}
-        onClose={() => setDrawerAddress(null)}
-        entityType="tokenHolder"
-        address={drawerAddress || ""}
-        daoId={daoId}
-      />
     </>
   );
 };

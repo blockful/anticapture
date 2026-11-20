@@ -63,7 +63,6 @@ import {
   deriveOffchainVoteWeights,
   getOffchainVoteChoiceLabels,
 } from "@/features/governance/utils/offchainVoteWeights";
-import { HoldersAndDelegatesDrawer } from "@/features/holders-and-delegates";
 import { ProposalHeaderProvider } from "@/features/governance/context/ProposalHeaderContext";
 import { Button } from "@/shared/components";
 import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankSlate";
@@ -128,7 +127,6 @@ export const ProposalSection = ({
   const [signedAt, setSignedAt] = useState<number | null>(null);
   const [isQueueModalOpen, setIsQueueModalOpen] = useState(false);
   const [isExecuteModalOpen, setIsExecuteModalOpen] = useState(false);
-  const [drawerAddress, setDrawerAddress] = useState<string | null>(null);
   const daoEnum = (daoId as string).toUpperCase() as DaoIdEnum;
   const { decimals } = daoConfig[daoEnum];
 
@@ -149,14 +147,6 @@ export const ProposalSection = ({
     if (signedAt !== null) setSignedAt(null);
     if (isChangingVote) setIsChangingVote(false);
   }
-
-  const handleAddressClick = useCallback((addr: string) => {
-    setDrawerAddress(addr);
-  }, []);
-
-  const handleCloseDrawer = useCallback(() => {
-    setDrawerAddress(null);
-  }, []);
 
   const {
     data: onchainProposal,
@@ -566,11 +556,7 @@ export const ProposalSection = ({
           <div className="bg-surface-background sticky top-[65px] z-10 hidden h-5 w-full lg:block" />
           <div className="flex flex-col gap-6 p-5 lg:flex-row lg:pt-0">
             <div className="self-star left-0 top-5 flex h-fit w-full flex-col gap-4 lg:sticky lg:top-[85px] lg:w-[420px]">
-              <TitleSection
-                proposal={proposal}
-                onAddressClick={handleAddressClick}
-                isOffchain={isOffchain}
-              />
+              <TitleSection proposal={proposal} isOffchain={isOffchain} />
               <ProposalInfoSection
                 proposal={proposal}
                 decimals={isOffchain ? 0 : decimals}
@@ -593,7 +579,6 @@ export const ProposalSection = ({
 
             <TabsSection
               proposal={proposal}
-              onAddressClick={handleAddressClick}
               isOffchain={isOffchain}
               isWhitelabel={isWhitelabel}
               offchainProposalId={offchainProposalId}
@@ -629,14 +614,6 @@ export const ProposalSection = ({
                 onClose={() => setIsExecuteModalOpen(false)}
                 action="execute"
                 proposal={proposal}
-                daoId={daoEnum}
-              />
-
-              <HoldersAndDelegatesDrawer
-                isOpen={!!drawerAddress}
-                onClose={handleCloseDrawer}
-                entityType="delegate"
-                address={drawerAddress || ""}
                 daoId={daoEnum}
               />
             </>

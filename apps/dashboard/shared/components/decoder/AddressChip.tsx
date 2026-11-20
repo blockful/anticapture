@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { Address } from "viem";
 
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
@@ -10,6 +11,9 @@ import {
   ADDRESS_ENRICHMENT_STALE_TIME,
 } from "@/shared/constants/api";
 import { resolveKnownIdentity } from "@/shared/services/decoder/knownIdentities";
+import daoConfigByDaoId from "@/shared/dao-config";
+import { useAddressProfileHref } from "@/shared/hooks/useAddressProfileHref";
+import { useOptionalDaoId } from "@/shared/providers/DaoIdProvider";
 import { cn } from "@/shared/utils/cn";
 import { shortHex } from "@/shared/utils/shortHex";
 import { useGetAddress } from "@anticapture/client/hooks";
@@ -86,6 +90,17 @@ export const AddressChip = ({
 
   const avatar = <IdentityAvatar address={address} identity={identity} />;
 
+  // Inside a DAO, a wallet named in an action (a grant recipient, a new
+  // signer) has a governance history worth opening, so its name leads to the
+  // address profile. Contracts (tokens, the timelock) keep the explorer, which
+  // says more about them, and so does everything outside a DAO page (the
+  // standalone decoder) or on another chain.
+  const daoId = useOptionalDaoId();
+  const profileHref = useAddressProfileHref(address);
+  const isOnDaoChain =
+    !!daoId && daoConfigByDaoId[daoId]?.daoOverview.chain.id === chainId;
+  const linksToProfile = !!profileHref && isOnDaoChain && isContract === false;
+
   return (
     <span
       title={resolvedName ? `${resolvedName} · ${address}` : address}
@@ -113,7 +128,16 @@ export const AddressChip = ({
         </span>
         <span className="contents md:hidden">{avatar}</span>
       </span>
-      {explorerUrl ? (
+      {explorerUrl && profileHref && linksToProfile && (
+        <Link
+          href={profileHref}
+          prefetch={false}
+          className="min-w-0 hover:underline"
+        >
+          {nameContent}
+        </Link>
+      )}
+      {explorerUrl && !linksToProfile && (
         <a
           href={`${explorerUrl}/address/${address}`}
           target="_blank"
@@ -122,9 +146,8 @@ export const AddressChip = ({
         >
           {nameContent}
         </a>
-      ) : (
-        nameContent
       )}
+      {!explorerUrl && nameContent}
       {!compact && resolvedName && (
         <span className="text-secondary @xl:inline hidden shrink-0 text-sm leading-5">
           {shortAddress}

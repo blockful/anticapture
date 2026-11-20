@@ -9,14 +9,11 @@ import { useFeedEventsInfinite } from "@anticapture/client/hooks";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useRef } from "react";
 
-import { useDrawerEntityOverride } from "@/features/holders-and-delegates/hooks/useDrawerEntityOverride";
-import { useDrawerNavigation } from "@/features/holders-and-delegates/hooks/useDrawerNavigation";
 import { SegmentedControl } from "@/shared/components/design-system/segmented-control";
 import { FeedEventItem } from "@/shared/components/feed/FeedEventItem";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
 import { EmptyState } from "@/shared/components/design-system/table/components/EmptyState";
 import type { DaoIdEnum } from "@/shared/types/daos";
-import type { EntityType } from "@/shared/types/entities";
 import { groupFeedEventsByDate } from "@/shared/utils/groupFeedEventsByDate";
 
 type RelevanceOption = FeedEventsQueryParamsRelevanceEnumKey | "ALL";
@@ -33,15 +30,15 @@ const RELEVANCE_OPTIONS: {
 
 const RELEVANCE_VALUES = RELEVANCE_OPTIONS.map((option) => option.value);
 
-interface DrawerActivityFeedProps {
+interface AddressActivityFeedProps {
   address: string;
   daoId: DaoIdEnum;
 }
 
-export const DrawerActivityFeed = ({
+export const AddressActivityFeed = ({
   address,
   daoId,
-}: DrawerActivityFeedProps) => {
+}: AddressActivityFeedProps) => {
   const [orderDirection, setOrderDirection] = useQueryState(
     "feedOrder",
     parseAsStringEnum(["asc", "desc"]).withDefault("desc"),
@@ -71,7 +68,7 @@ export const DrawerActivityFeed = ({
       // whose thresholds would hide most of the address's activity.
       relevance: relevance as FeedEventsQueryParamsRelevanceEnumKey,
     },
-    // An empty address would be rejected with a 400 while the drawer closes.
+    // An empty address would be rejected with a 400.
     { query: { getNextPageParam, enabled: Boolean(address) } },
   );
 
@@ -96,24 +93,6 @@ export const DrawerActivityFeed = ({
     observer.observe(node);
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-  const [setDrawerAddress, setDrawerTab] = [
-    useQueryState("drawerAddress")[1],
-    useQueryState("drawerTab")[1],
-  ];
-  const { setDrawerEntity } = useDrawerEntityOverride();
-  // `drawerAddress` re-points the owners that read it from the URL; the drawer
-  // itself covers the ones holding the address in local state.
-  const navigation = useDrawerNavigation();
-
-  // Clicking a delegate from a token-holder drawer has to open the delegate
-  // profile, so the clicked entity type travels with the clicked address.
-  const handleRowClick = (clicked: string, clickedEntityType: EntityType) => {
-    setDrawerTab(null);
-    setDrawerEntity(clickedEntityType, clicked);
-    setDrawerAddress(clicked);
-    navigation?.repoint(clicked);
-  };
 
   return (
     <div className="flex h-full flex-col gap-4 overflow-hidden p-4">
@@ -178,7 +157,6 @@ export const DrawerActivityFeed = ({
                     key={`${event.txHash}-${event.logIndex}`}
                     event={event}
                     isLast={index === group.events.length - 1}
-                    onRowClick={handleRowClick}
                   />
                 ))}
               </div>
