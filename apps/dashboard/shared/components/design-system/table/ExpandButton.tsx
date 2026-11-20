@@ -1,6 +1,8 @@
 import type { Row } from "@tanstack/react-table";
 import { Minus, Plus } from "lucide-react";
 
+import { cn } from "@/shared/utils/cn";
+
 interface ExpandButtonProps<TData> {
   row: Row<TData>;
   enableExpanding: boolean;
@@ -26,7 +28,7 @@ export const ExpandButton = <TData extends ExpandableData>({
           e.stopPropagation();
           row.getToggleExpandedHandler()();
         }}
-        className="text-secondary hover:text-primary p-1 transition-colors"
+        className="text-secondary hover:text-primary shrink-0 p-1 transition-colors"
       >
         {isExpanded ? (
           <Minus className="size-4" />
@@ -37,5 +39,7 @@ export const ExpandButton = <TData extends ExpandableData>({
     );
   }
 
-  return <div className={row.depth === 0 ? "w-6" : "w-2"} />;
+  // shrink-0: a long label in the same cell would otherwise squeeze the
+  // spacer away and misalign the row against the ones that have a toggle.
+  return <div className={cn("shrink-0", row.depth === 0 ? "w-6" : "w-2")} />;
 };

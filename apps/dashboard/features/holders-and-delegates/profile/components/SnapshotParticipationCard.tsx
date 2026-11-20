@@ -15,6 +15,7 @@ const toValue = (
     return <span className="text-secondary">Unavailable</span>;
 
   const { votedProposals, eligibleProposals } = participation.value;
+  if (votedProposals === 0) return "Never voted";
   const share =
     eligibleProposals > 0
       ? Math.round((votedProposals / eligibleProposals) * 100)

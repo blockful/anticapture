@@ -115,9 +115,12 @@ export const SnapshotVotesTable = ({
         isLoading ? (
           <SkeletonRow className="h-5 w-16" />
         ) : (
+          // Approval and ranked votes list several options; the full text
+          // stays one hover away instead of spilling into the next column.
           <span
+            title={row.original.choice}
             className={cn(
-              "text-sm",
+              "block max-w-48 truncate text-sm",
               CHOICE_TONE[row.original.choice.toLowerCase()] ?? "text-primary",
             )}
           >
