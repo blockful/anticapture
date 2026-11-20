@@ -1,31 +1,34 @@
-import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { notFound, permanentRedirect } from "next/navigation";
 
-import { WhitelabelDelegateDetailPage } from "@/features/holders-and-delegates/components/WhitelabelDelegateDetailPage";
-import daoConfigByDaoId from "@/shared/dao-config";
-import type { DaoIdEnum } from "@/shared/types/daos";
+import { toDaoIdEnum } from "@/shared/types/daos";
+import {
+  WHITELABEL_ROUTES,
+  resolveWhitelabelDaoIdFromHeaders,
+} from "@/shared/utils/whitelabel";
 
 type Props = {
   params: Promise<{ daoId: string; address: string }>;
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { daoId } = await params;
-  const daoIdEnum = daoId.toUpperCase() as DaoIdEnum;
-  const daoConfig = daoConfigByDaoId[daoIdEnum];
-
-  return {
-    title: "Delegate details",
-    description: `Inspect delegate voting behavior and history for ${daoConfig.name}.`,
-  };
-}
-
-export default async function WhitelabelDelegateAddressPage({ params }: Props) {
+/**
+ * Old delegate route: it only opened the profile drawer over the delegates
+ * table. The address profile page replaced it. On the DAO's own domain the
+ * middleware already redirects; this covers the internal path.
+ */
+export default async function LegacyWhitelabelDelegatePage({ params }: Props) {
   const { daoId, address } = await params;
+  const daoIdEnum = toDaoIdEnum(daoId);
 
-  return (
-    <WhitelabelDelegateDetailPage
-      daoId={daoId.toUpperCase() as DaoIdEnum}
-      address={address}
-    />
+  if (!daoIdEnum) notFound();
+
+  const isOnDaoDomain =
+    resolveWhitelabelDaoIdFromHeaders(await headers()) === daoIdEnum;
+  const route = `${WHITELABEL_ROUTES.address}/${address}`;
+
+  permanentRedirect(
+    isOnDaoDomain
+      ? `/${route}`
+      : `/whitelabel/${daoIdEnum.toLowerCase()}/${route}`,
   );
 }

@@ -13,10 +13,13 @@ import { MetricCard } from "@/shared/components";
 import type { FilterOption } from "@/shared/components/design-system/table/filters/CategoriesFilter";
 import { SECONDS_PER_DAY } from "@/shared/constants/time-related";
 import type { DaoIdEnum } from "@/shared/types/daos";
+import { cn } from "@/shared/utils/cn";
 
 interface DelegateProposalsActivityProps {
   address: string;
   daoId: DaoIdEnum;
+  /** The profile page shows these numbers in its summary instead. */
+  withMetrics?: boolean;
 }
 
 export const formatAvgTime = (
@@ -38,6 +41,7 @@ export const formatAvgTime = (
 export const DelegateProposalsActivity = ({
   address,
   daoId,
+  withMetrics = true,
 }: DelegateProposalsActivityProps) => {
   const limit: number = 20;
 
@@ -103,33 +107,40 @@ export const DelegateProposalsActivity = ({
 
   return (
     <div className="flex h-full flex-col overflow-hidden">
-      <div className="shrink-0 p-4">
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <MetricCard
-            icon={<Hand className="size-3.5" />}
-            title="Voted Proposals"
-            value={votedProposalsValue}
-          />
-          <MetricCard
-            icon={<Trophy className="size-3.5" />}
-            title="Win Rate"
-            value={winRateValue}
-          />
-          <MetricCard
-            icon={<Check className="size-3.5" />}
-            title="For Rate"
-            value={yesRateValue}
-          />
-          <MetricCard
-            icon={<Zap className="size-3.5" />}
-            title="Avg. Vote Timing"
-            value={avgTimingValue}
-          />
+      {withMetrics && (
+        <div className="shrink-0 p-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <MetricCard
+              icon={<Hand className="size-3.5" />}
+              title="Voted Proposals"
+              value={votedProposalsValue}
+            />
+            <MetricCard
+              icon={<Trophy className="size-3.5" />}
+              title="Win Rate"
+              value={winRateValue}
+            />
+            <MetricCard
+              icon={<Check className="size-3.5" />}
+              title="For Rate"
+              value={yesRateValue}
+            />
+            <MetricCard
+              icon={<Zap className="size-3.5" />}
+              title="Avg. Vote Timing"
+              value={avgTimingValue}
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Proposals Table */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4">
+      <div
+        className={cn(
+          "flex min-h-0 flex-1 flex-col overflow-hidden px-4 pb-4",
+          !withMetrics && "pt-4",
+        )}
+      >
         <div className="flex min-h-0 flex-1 flex-col gap-2 overflow-hidden">
           <ProposalsTable
             proposals={data?.proposals || []}
