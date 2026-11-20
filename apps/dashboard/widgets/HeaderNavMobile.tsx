@@ -76,10 +76,16 @@ export const HeaderNavMobile = () => {
 
   const isDaoOverviewPage =
     pathname === `/${daoId}` || pathname === `/${daoId}/`;
+  // Address profiles have no entry of their own; they open from the
+  // stakeholders tables, so that is the page the selector shows.
+  const isAddressProfilePage = /\/address\/[^/]+/.test(pathname ?? "");
+  const pathnameForMatch = isAddressProfilePage
+    ? `/${daoId}/stakeholders`
+    : pathname;
   const currentPage = isDaoOverviewPage
     ? "/"
-    : (enabledOptions.find((o) => pathname?.includes(`/${o.page}`))?.page ??
-      "/");
+    : (enabledOptions.find((o) => pathnameForMatch?.includes(`/${o.page}`))
+        ?.page ?? "/");
 
   const handleChange = (value: string) => {
     if (value === "/") {
