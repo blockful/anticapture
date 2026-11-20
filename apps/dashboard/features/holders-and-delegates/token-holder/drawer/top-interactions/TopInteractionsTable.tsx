@@ -19,7 +19,7 @@ import { useAccountInteractionsData } from "@/features/holders-and-delegates/tok
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { Button, SkeletonRow } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { AddressFilter } from "@/shared/components/design-system/table/filters";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { SortOption } from "@/shared/components/design-system/table/filters/amount-filter/components";
@@ -210,10 +210,7 @@ export const TopInteractionsTable = ({
         const addressValue: string = row.getValue("address");
         return (
           <div className="flex w-full items-center gap-2">
-            <DrawerAddressButton
-              address={addressValue as Address}
-              entityType="tokenHolder"
-            />
+            <AddressLink address={addressValue as Address} />
             {isDust(row.original.volume) && (
               <BadgeStatus variant="dimmed">Dust</BadgeStatus>
             )}

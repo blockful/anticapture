@@ -26,13 +26,9 @@ type VoteTabId = "voted" | "didntVote";
 
 interface VotesTabContentProps {
   proposal: ProposalDetails;
-  onAddressClick?: (address: string) => void;
 }
 
-export const VotesTabContent = ({
-  proposal,
-  onAddressClick,
-}: VotesTabContentProps) => {
+export const VotesTabContent = ({ proposal }: VotesTabContentProps) => {
   const [activeTab, setActiveTab] = useQueryState(
     "voteTab",
     parseAsStringEnum<VoteTabId>(["voted", "didntVote"]).withDefault("voted"),
@@ -163,15 +159,9 @@ export const VotesTabContent = ({
 
       <div className="flex flex-col gap-3">
         {activeTab === "voted" ? (
-          <TabsVotedContent
-            proposal={proposal}
-            onAddressClick={onAddressClick}
-          />
+          <TabsVotedContent proposal={proposal} />
         ) : (
-          <TabsDidntVoteContent
-            proposal={proposal}
-            onAddressClick={onAddressClick}
-          />
+          <TabsDidntVoteContent proposal={proposal} />
         )}
       </div>
     </div>

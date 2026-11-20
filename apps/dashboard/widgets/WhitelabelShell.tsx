@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
 
 import { Button } from "@/shared/components";
+import { MyProfileLink } from "@/shared/components/wallet/MyProfileLink";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import daoConfigByDaoId from "@/shared/dao-config";
 import type { DaoIdEnum } from "@/shared/types/daos";
@@ -77,8 +78,13 @@ export const WhitelabelShell = ({
                 : "pointer-events-none opacity-0",
             )}
           >
-            <div className="mb-4 sm:hidden">
+            <div className="mb-4 flex flex-col gap-2 sm:hidden">
               <WhitelabelConnectWallet className="w-full justify-center" />
+              <MyProfileLink
+                variant="label"
+                className="w-full justify-center"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
             </div>
 
             <nav className="flex flex-col gap-2">

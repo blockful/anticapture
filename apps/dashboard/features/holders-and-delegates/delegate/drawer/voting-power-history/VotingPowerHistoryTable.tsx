@@ -19,7 +19,7 @@ import { useDelegateDelegationHistory } from "@/features/holders-and-delegates/h
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow, Button, IconButton } from "@/shared/components";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { DrawerAddressButton } from "@/features/holders-and-delegates/components/DrawerAddressButton";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { Switch } from "@/shared/components/design-system/switch/Switch";
 import { DateCell } from "@/shared/components/design-system/table/cells/DateCell";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
@@ -364,9 +364,8 @@ export const VotingPowerHistoryTable = ({
         return (
           <div className="group flex items-center gap-3">
             <div className="flex max-w-40 items-center gap-2 overflow-hidden">
-              <DrawerAddressButton
+              <AddressLink
                 address={delegatorAddress}
-                entityType="tokenHolder"
                 addressChars={6}
                 nameClassName={cn(
                   "max-w-[140px]",
@@ -452,9 +451,8 @@ export const VotingPowerHistoryTable = ({
         return (
           <div className="group flex items-center justify-between gap-3">
             <div className="flex max-w-40 items-center gap-2 overflow-hidden">
-              <DrawerAddressButton
+              <AddressLink
                 address={delegateAddress}
-                entityType="delegate"
                 nameClassName={cn(
                   "max-w-[140px]",
                   delegateAddress === accountId

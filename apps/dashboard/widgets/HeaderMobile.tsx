@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useState, useEffect, useMemo, type ElementType } from "react";
 
 import { ButtonHeaderSidebar, ConnectWallet } from "@/shared/components";
+import { MyProfileLink } from "@/shared/components/wallet/MyProfileLink";
 import { AnticaptureIcon } from "@/shared/components/icons";
 import { cn } from "@/shared/utils/";
 
@@ -139,6 +140,7 @@ export const HeaderMobile = ({
             <AnticaptureIcon className="size-11" />
           </Link>
           <div className="flex items-center gap-3">
+            <MyProfileLink className="rounded-md! px-2! py-1!" />
             <div className="flex h-full w-full">
               <ConnectWallet className="rounded-md! px-2! py-1! text-sm! font-medium!" />
             </div>

@@ -8,7 +8,7 @@ import { cn } from "@/shared/utils";
 interface MetricCardProps {
   icon: ReactNode;
   title: string;
-  value?: string;
+  value?: ReactNode;
   className?: string;
 }
 

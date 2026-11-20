@@ -5,18 +5,14 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Plus } from "lucide-react";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useMemo } from "react";
-import type { Address } from "viem";
 import { formatUnits, parseUnits } from "viem";
 
-import {
-  useDelegates,
-  HoldersAndDelegatesDrawer,
-} from "@/features/holders-and-delegates";
+import { useDelegates } from "@/features/holders-and-delegates";
 import { DEFAULT_ITEMS_PER_PAGE } from "@/features/holders-and-delegates/utils";
 import { SkeletonRow } from "@/shared/components/skeletons";
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { CopyAndPasteButton } from "@/shared/components/buttons/CopyAndPasteButton";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { AddressFilter } from "@/shared/components/design-system/table/filters/AddressFilter";
 import { AmountFilter } from "@/shared/components/design-system/table/filters/amount-filter/AmountFilter";
 import type { AmountFilterState } from "@/shared/components/design-system/table/filters/amount-filter/store/amount-filter-store";
@@ -25,6 +21,7 @@ import { Table } from "@/shared/components/design-system/table/Table";
 import { ArrowUpDown, ArrowState } from "@/shared/components/icons";
 import { PERCENTAGE_NO_BASELINE } from "@/shared/constants/api";
 import { DAYS_IN_SECONDS } from "@/shared/constants/time-related";
+import { useOpenAddressProfile } from "@/shared/hooks/useAddressProfileHref";
 import { useScreenSize } from "@/shared/hooks/useScreenSize";
 import { DaoIdEnum } from "@/shared/types/daos";
 import type { TimeInterval } from "@/shared/types/enums";
@@ -60,7 +57,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
     [days],
   );
 
-  const [drawerAddress, setDrawerAddress] = useQueryState("drawerAddress");
+  const openProfile = useOpenAddressProfile(DaoIdEnum.AAVE);
   const [currentAddressFilter, setCurrentAddressFilter] =
     useQueryState("address");
   const [sortOrder, setSortOrder] = useQueryState(
@@ -221,11 +218,9 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         return (
           <div className="group flex w-40 items-center lg:w-full">
             <div className="min-w-0 flex-1">
-              <EnsAvatar
-                address={address as Address}
-                size="sm"
-                variant="rounded"
-                isDashed={true}
+              <AddressLink
+                address={address}
+                daoId={daoId}
                 nameClassName="[tr:hover_&]:border-primary"
               />
             </div>
@@ -515,7 +510,7 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
         <Table
           columns={delegateColumns}
           data={loading ? Array(DEFAULT_ITEMS_PER_PAGE).fill({}) : tableData}
-          onRowClick={(row) => setDrawerAddress(row.address as Address)}
+          onRowClick={(row) => openProfile(row.address)}
           withRowBorders
           hasMore={hasNextPage}
           isLoadingMore={fetchingMore}
@@ -525,14 +520,6 @@ export function DelegationTable({ days }: { days: TimeInterval }) {
           fillHeight
         />
       </div>
-      <HoldersAndDelegatesDrawer
-        isOpen={!!drawerAddress}
-        onClose={() => setDrawerAddress(null)}
-        entityType="delegate"
-        address={drawerAddress || ""}
-        daoId={daoId}
-        withVotes={false}
-      />
     </>
   );
 }

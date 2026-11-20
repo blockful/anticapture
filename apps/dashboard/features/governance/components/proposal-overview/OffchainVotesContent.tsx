@@ -11,7 +11,6 @@ import { useVotesOffchainByProposalIdInfinite } from "@anticapture/client/hooks"
 import type { ColumnDef } from "@tanstack/react-table";
 import { CheckCircle2, CircleMinus, Inbox, XCircle } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Address } from "viem";
 
 import { OffchainVoteLabelChip } from "@/features/governance/components/proposal-overview/OffchainVoteLabelChip";
 import { VotesTable } from "@/features/governance/components/proposal-overview/VotesTable";
@@ -20,7 +19,7 @@ import { BlankSlate } from "@/shared/components/design-system/blank-slate/BlankS
 import { Button } from "@/shared/components/design-system/buttons/button/Button";
 import { FetchErrorState } from "@/shared/components/errors/FetchErrorState";
 import { SkeletonRow } from "@/shared/components/skeletons/SkeletonRow";
-import { EnsAvatar } from "@/shared/components/design-system/avatars/ens-avatar/EnsAvatar";
+import { AddressLink } from "@/shared/components/address/AddressLink";
 import { ArrowState, ArrowUpDown } from "@/shared/components/icons";
 import type { DaoIdEnum } from "@/shared/types/daos";
 import { formatNumberUserReadable } from "@/shared/utils/formatNumberUserReadable";
@@ -213,17 +212,13 @@ export const OffchainVotesContent = ({
           }
 
           return (
-            <div className="flex h-10 items-center p-2">
-              <EnsAvatar
-                address={voter as Address}
-                size="sm"
-                variant="rounded"
-                showName={true}
-                isDashed={true}
-              />{" "}
+            // max-w + min-w-0: long Arkham labels truncate inside the column
+            // instead of running into the choice next to it.
+            <div className="flex h-10 min-w-0 max-w-[200px] items-center p-2">
+              <AddressLink address={voter} />
               <CopyAndPasteButton
                 textToCopy={voter}
-                className="text-secondary hover:text-primary ml-2 inline-flex p-1 align-middle transition-colors"
+                className="text-secondary hover:text-primary ml-2 inline-flex shrink-0 p-1 align-middle transition-colors"
                 iconSize="md"
               />
             </div>

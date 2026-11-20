@@ -27,3 +27,11 @@ export function useDaoId(): DaoIdEnum {
 
   return daoId;
 }
+
+/**
+ * The DAO of the current page, or null outside a DAO route (the global panel,
+ * the decoder tool). For components that render on both.
+ */
+export function useOptionalDaoId(): DaoIdEnum | null {
+  return useContext(DaoIdContext);
+}

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryState } from "nuqs";
 
 import { Input } from "@/shared/components/design-system/form/fields/input/Input";
+import { MyProfileLink } from "@/shared/components/wallet/MyProfileLink";
 import { WhitelabelConnectWallet } from "@/shared/components/wallet/WhitelabelConnectWallet";
 import { getWhitelabelSearchPlaceholder } from "@/shared/utils/whitelabel";
 
@@ -66,7 +67,8 @@ export const WhitelabelHeader = () => {
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2">
+        <MyProfileLink variant="label" />
         <WhitelabelConnectWallet />
       </div>
     </header>
