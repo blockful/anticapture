@@ -8,15 +8,13 @@
   "deploy": {
     "healthcheckPath": "/ready",
     "restartPolicyType": "NEVER",
-    "healthcheckTimeout": 172800,
-    "preDeployCommand": "npm run db:prune"
+    "healthcheckTimeout": 172800
   },
   "environments": {
     "pr": {
       "deploy": {
         "startCommand": "echo 'NOOP'",
-        "healthcheckPath": null,
-        "preDeployCommand": null
+        "healthcheckPath": null
       }
     }
   }
