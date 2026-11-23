@@ -329,14 +329,29 @@ jobs:
 
           exit 1
 
+  # typecheck, test and dashboard-e2e run whether or not the preview gateful
+  # came up. They need a gateful only as the source of the OpenAPI spec that
+  # @anticapture/client is generated from:
+  #   - preview ready: the spec of this PR's own gateful, which includes the
+  #     contract changes the PR makes;
+  #   - preview down:  the spec of the shared dev gateful.
+  # Before, a failed wait-for-gateful skipped all three, so a broken preview
+  # stack meant no PR was typechecked or tested at all. wait-for-gateful still
+  # fails on its own when the preview is down, so the problem stays visible.
+  # `!cancelled()` is what lets a job run after a failed `needs`.
   typecheck:
     needs: [configure-vercel-preview, wait-for-gateful]
-    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    if: ${{ !cancelled() && needs.configure-vercel-preview.result == 'success' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     env:
-      ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+      ANTICAPTURE_API_URL: ${{ needs.wait-for-gateful.result == 'success' && needs.configure-vercel-preview.outputs.gateful_url || 'https://dev-gateful.up.railway.app' }}
 
     steps:
+      # See the comment above the typecheck job.
+      - name: Warn when the SDK comes from the dev spec
+        if: needs.wait-for-gateful.result != 'success'
+        run: echo "::warning title=Preview gateful is down::The preview gateful of this PR never became ready, so @anticapture/client is generated from the shared dev spec. API contract changes made by this PR are not in that spec, so a PR that adds or changes an endpoint can fail here for that reason alone."
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -394,12 +409,17 @@ jobs:
 
   test:
     needs: [configure-vercel-preview, wait-for-gateful]
-    if: ${{ !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    if: ${{ !cancelled() && needs.configure-vercel-preview.result == 'success' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     env:
-      ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
+      ANTICAPTURE_API_URL: ${{ needs.wait-for-gateful.result == 'success' && needs.configure-vercel-preview.outputs.gateful_url || 'https://dev-gateful.up.railway.app' }}
 
     steps:
+      # See the comment above the typecheck job.
+      - name: Warn when the SDK comes from the dev spec
+        if: needs.wait-for-gateful.result != 'success'
+        run: echo "::warning title=Preview gateful is down::The preview gateful of this PR never became ready, so @anticapture/client is generated from the shared dev spec. API contract changes made by this PR are not in that spec, so a PR that adds or changes an endpoint can fail here for that reason alone."
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -462,11 +482,21 @@ jobs:
     # Trusted authors only: fork PRs get no repository secrets, so
     # E2E_BLOCKFUL_API_TOKEN is empty there and every external contribution
     # would fail on the probe below without a single test having run.
-    if: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
-    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && needs.configure-vercel-preview.result == 'success' && needs.configure-vercel-preview.outputs.trusted == 'true' && !(startsWith(github.head_ref, 'changeset-release/') && github.actor == 'github-actions[bot]' && github.event.pull_request.user.login == 'github-actions[bot]' && github.event.pull_request.head.repo.full_name == github.repository) }}
+    # Pinned: `ubuntu-latest` is Ubuntu 26.04 now, and the Playwright version
+    # in apps/dashboard (1.58.2) has no browser build for it, so
+    # `playwright install --with-deps` fails before a single test runs. Go
+    # back to ubuntu-latest once Playwright is upgraded to a release that
+    # supports 26.04.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     steps:
+      # See the comment above the typecheck job.
+      - name: Warn when the SDK comes from the dev spec
+        if: needs.wait-for-gateful.result != 'success'
+        run: echo "::warning title=Preview gateful is down::The preview gateful of this PR never became ready, so @anticapture/client is generated from the shared dev spec. API contract changes made by this PR are not in that spec, so a PR that adds or changes an endpoint can fail here for that reason alone."
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -536,7 +566,10 @@ jobs:
           # 404s against dev. Closing that needs a preview-issued token (the
           # preview authful seeds its own from SEED_TOKEN_PLAINTEXT); wire one
           # into a repo secret and point both at the preview stack if it bites.
-          RAILWAY_ENVIRONMENT_NAME: anticapture-pr-${{ github.event.pull_request.number }}
+          #
+          # When the preview gateful never came up there is no PR spec to read:
+          # leave this empty, and codegen uses ANTICAPTURE_API_URL (dev) too.
+          RAILWAY_ENVIRONMENT_NAME: ${{ needs.wait-for-gateful.result == 'success' && format('anticapture-pr-{0}', github.event.pull_request.number) || '' }}
           # The /api/user auth/session proxy throws on boot without this, and
           # the resulting same-origin 500s trip the suite's 5xx watcher.
           USER_API_URL: https://user-api-dev-9002.up.railway.app
