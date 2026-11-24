@@ -14,15 +14,63 @@ jobs:
       user_api_url: ${{ steps.vercel-env.outputs.user_api_url }}
       trusted: ${{ steps.trust.outputs.trusted }}
       configured: ${{ steps.vercel-upsert.outputs.configured }}
+      own_backend: ${{ steps.vercel-env.outputs.own_backend }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # The merge commit plus its base-side parent, so the scope step below
+          # can diff exactly what this PR changes.
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+
+      # Does this PR change anything the backend serves? A PR that only touches
+      # the dashboard (or the generated SDK, docs, changesets, CI) is previewed
+      # against the shared dev services instead of its own Railway stack.
+      #
+      # Such a PR gains nothing from its own stack, and depending on it cost the
+      # preview entirely: PR environments run no indexers, so their DAO APIs
+      # read dev's databases over public TCP proxies (apps/api/src/env.ts swaps
+      # in DATABASE_PUBLIC_URL there). When those proxies went away (Nov 2026)
+      # every DAO API failed its health check when the environment was created,
+      # later pushes never retried them (Railway skips services whose watch
+      # paths a push leaves alone), gateful's /health stayed 503, and the wait
+      # below timed out on every PR with no preview deployed.
+      #
+      # Anything outside the list below keeps the PR's own stack, so a change
+      # to an API, gateful, the relayer, a Dockerfile or a shared package still
+      # previews the code it changes. If the diff can't be computed, the PR
+      # keeps its own stack too (the behaviour before this step existed).
+      - name: Decide whether the preview needs its own backend
+        id: scope
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          own_backend=false
+          if ! changed=$(git diff --name-only HEAD^1 HEAD); then
+            echo "::warning::Could not diff this PR; previewing it against its own Railway stack."
+            own_backend=true
+          fi
+
+          while IFS= read -r path; do
+            [ -z "${path}" ] && continue
+            case "${path}" in
+              apps/dashboard/* | packages/anticapture-client/* | .changeset/* | .github/* | docs/* | *.md) ;;
+              *)
+                echo "Backend-relevant change: ${path}"
+                own_backend=true
+                ;;
+            esac
+          done <<< "${changed:-}"
+
+          echo "own_backend=${own_backend}" >> "${GITHUB_OUTPUT}"
+          echo "Preview needs its own backend: ${own_backend}"
 
       # Gate the Vercel secret operations to trusted authors only: repo codeowners
       # (matched against the CODEOWNERS file so the list can't drift) or members /
@@ -57,20 +105,25 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           IS_TRUSTED: ${{ steps.trust.outputs.trusted }}
+          NEEDS_BACKEND: ${{ steps.scope.outputs.own_backend }}
         run: |
           set -euo pipefail
 
-          # Trusted PRs get their own ephemeral Railway preview; untrusted PRs
-          # (no Vercel/Railway preview is provisioned for them) fall back to the
-          # shared dev services so the downstream wait/typecheck/test jobs have
-          # a live target instead of a preview host that never comes up.
-          if [ "${IS_TRUSTED}" = "true" ]; then
+          # Trusted PRs that change the backend get their own ephemeral Railway
+          # preview. Everything else uses the shared dev services: untrusted PRs
+          # (no Vercel/Railway preview is provisioned for them) so the downstream
+          # wait/typecheck/test jobs have a live target, and dashboard-only PRs
+          # so their Vercel preview has data to show (see the scope step).
+          if [ "${IS_TRUSTED}" = "true" ] && [ "${NEEDS_BACKEND}" = "true" ]; then
+            own_backend=true
             gateful_url="https://gateful-anticapture-pr-${PR_NUMBER}.up.railway.app"
             user_api_url="https://user-api-anticapture-pr-${PR_NUMBER}.up.railway.app"
           else
+            own_backend=false
             gateful_url="https://dev-gateful.up.railway.app"
             user_api_url="https://user-api-dev-9002.up.railway.app"
           fi
+          echo "own_backend=${own_backend}" >> "${GITHUB_OUTPUT}"
           echo "gateful_url=${gateful_url}" >> "${GITHUB_OUTPUT}"
           echo "user_api_url=${user_api_url}" >> "${GITHUB_OUTPUT}"
 
@@ -165,13 +218,16 @@ jobs:
         run: node scripts/wait-for-gateful.mjs
         env:
           ANTICAPTURE_API_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
-          # Trusted PRs target their own preview, so wait for the exact PR commit.
-          # Untrusted PRs target shared dev Gateful (which serves a different
-          # commit), so only assert reachability — leave the SHA unset. The
-          # upstream check rides along with it: the script skips it entirely
-          # when there is no expected gateful commit.
-          EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && github.event.pull_request.head.sha || '' }}
-          STALE_UPSTREAM_SHAS: ${{ needs.configure-vercel-preview.outputs.trusted == 'true' && steps.upstreams.outputs.shas || '' }}
+          # PRs with their own preview stack wait for the exact PR commit. The
+          # rest (untrusted and dashboard-only PRs) target shared dev Gateful,
+          # which serves a different commit, so only assert reachability —
+          # leave the SHA unset. The upstream check rides along with it: the
+          # script skips it entirely when there is no expected gateful commit.
+          EXPECTED_GATEFUL_SHA: ${{ needs.configure-vercel-preview.outputs.own_backend == 'true' && github.event.pull_request.head.sha || '' }}
+          STALE_UPSTREAM_SHAS: ${{ needs.configure-vercel-preview.outputs.own_backend == 'true' && steps.upstreams.outputs.shas || '' }}
+          # Same operator list deploy.yaml and release.yaml honour: a DAO that is
+          # re-indexing on dev must not block every PR's preview.
+          GATEFUL_TOLERATED_DOWN_UPSTREAMS: ${{ vars.GATEFUL_TOLERATED_DOWN_UPSTREAMS }}
 
   deploy-vercel-preview:
     name: Deploy Vercel preview
@@ -211,6 +267,10 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           GATEFUL_URL: ${{ needs.configure-vercel-preview.outputs.gateful_url }}
           USER_API_URL: ${{ needs.configure-vercel-preview.outputs.user_api_url }}
+          OWN_BACKEND: ${{ needs.configure-vercel-preview.outputs.own_backend }}
+          # Dev-issued gateful token, the one dashboard-e2e already uses against
+          # dev. Only passed to previews that read shared dev gateful.
+          DEV_GATEFUL_TOKEN: ${{ secrets.E2E_BLOCKFUL_API_TOKEN }}
           # Git metadata so Vercel attributes the deploy to the PR author (avatar +
           # "Created by"); a bare `vercel deploy` shows "No attribution data available".
           GIT_SHA: ${{ github.event.pull_request.head.sha }}
@@ -233,11 +293,35 @@ jobs:
         # `vercel deploy` prints the deployment URL to stdout; capture it so the
         # step below can surface it on the PR (the CLI deploy path doesn't get
         # Vercel's native Git-integration check/comment).
+        #
+        # A preview backed by shared dev gateful (dashboard-only PRs) also gets
+        # a dev-issued BLOCKFUL_API_TOKEN at runtime: the /api/gateful proxy
+        # injects it on every request, and the project's preview value is not
+        # guaranteed to be valid on dev (PR stacks seed their own authful from
+        # SEED_TOKEN_PLAINTEXT): a 401 there renders the preview without data.
         run: |
+          set -euo pipefail
+
+          token_env=()
+          if [ "${OWN_BACKEND}" != "true" ]; then
+            if [ -n "${DEV_GATEFUL_TOKEN:-}" ]; then
+              token_env=(--env BLOCKFUL_API_TOKEN="${DEV_GATEFUL_TOKEN}")
+              code=$(curl --silent --output /dev/null --write-out "%{http_code}" \
+                --header "Authorization: Bearer ${DEV_GATEFUL_TOKEN}" \
+                "${GATEFUL_URL}/ens/proposals?limit=1&skip=0" || echo "000")
+              if [ "${code}" != "200" ]; then
+                echo "::warning::The dev gateful token got HTTP ${code} from ${GATEFUL_URL}; the preview will deploy but may show no data. Update it with: gh secret set E2E_BLOCKFUL_API_TOKEN"
+              fi
+            else
+              echo "::warning::E2E_BLOCKFUL_API_TOKEN is unavailable; the preview keeps the project's BLOCKFUL_API_TOKEN, which dev gateful may reject."
+            fi
+          fi
+
           url=$(npx --yes vercel@latest deploy --yes --token="${VERCEL_TOKEN}" \
             --build-env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --env ANTICAPTURE_API_URL="${GATEFUL_URL}" \
             --env USER_API_URL="${USER_API_URL}" \
+            "${token_env[@]}" \
             --meta githubCommitSha="${GIT_SHA}" \
             --meta githubCommitRef="${GIT_REF}" \
             --meta githubCommitMessage="${GIT_MSG}" \
@@ -536,7 +620,10 @@ jobs:
           # 404s against dev. Closing that needs a preview-issued token (the
           # preview authful seeds its own from SEED_TOKEN_PLAINTEXT); wire one
           # into a repo secret and point both at the preview stack if it bites.
-          RAILWAY_ENVIRONMENT_NAME: anticapture-pr-${{ github.event.pull_request.number }}
+          #
+          # Dashboard-only PRs have no preview gateful of their own; leaving
+          # this empty sends codegen to ANTICAPTURE_API_URL (dev) like runtime.
+          RAILWAY_ENVIRONMENT_NAME: ${{ needs.configure-vercel-preview.outputs.own_backend == 'true' && format('anticapture-pr-{0}', github.event.pull_request.number) || '' }}
           # The /api/user auth/session proxy throws on boot without this, and
           # the resulting same-origin 500s trip the suite's 5xx watcher.
           USER_API_URL: https://user-api-dev-9002.up.railway.app
