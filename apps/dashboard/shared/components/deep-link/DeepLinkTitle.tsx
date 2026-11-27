@@ -69,7 +69,7 @@ export const DeepLinkTitle = ({
   return (
     <div
       className={cn(
-        "group/deep-link flex min-w-0 items-center gap-1.5",
+        "group/deep-link relative flex min-w-0 items-center gap-1.5",
         className,
       )}
     >
@@ -96,7 +96,8 @@ export const DeepLinkTitle = ({
           {info}
         </span>
       )}
-      {/* Read out by screen readers; out of the layout, so it takes no room. */}
+      {/* Read out by screen readers; out of the layout, so it takes no room
+          (absolute, anchored to the `relative` wrapper). */}
       <span role="status" className="sr-only">
         {feedback === "copied" && "Link copied"}
         {feedback === "address-bar" && "Link is in the address bar"}
